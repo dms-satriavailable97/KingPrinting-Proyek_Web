@@ -73,7 +73,7 @@ orderForm.addEventListener('submit', function(e) {
     // Encode message for URL
     const encodedMessage = encodeURIComponent(message);
     
-    // WhatsApp number (replace with actual number)
+    // WhatsApp number (updated by your friend)
     const whatsappNumber = '628997800507';
     
     // Create WhatsApp URL
