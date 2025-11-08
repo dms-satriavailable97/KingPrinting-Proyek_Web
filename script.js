@@ -124,22 +124,13 @@ function animateOnScroll() {
         const elementVisible = 150;
         
         if (elementTop < window.innerHeight - elementVisible) {
-            element.style.opacity = "1";
-            element.style.transform = "translateY(0)";
+            // Kita hanya tambahkan class, bukan style
+            element.classList.add('is-visible');
         }
     });
 }
 
-// Set initial state for animation
 document.addEventListener('DOMContentLoaded', function() {
-    const elements = document.querySelectorAll('.produk-item, .step, .keunggulan-item');
-    
-    elements.forEach(element => {
-        element.style.opacity = "0";
-        element.style.transform = "translateY(20px)";
-        element.style.transition = "opacity 0.5s ease, transform 0.5s ease";
-    });
-    
     window.addEventListener('scroll', animateOnScroll);
     // Trigger once on load for elements already in view
     animateOnScroll();

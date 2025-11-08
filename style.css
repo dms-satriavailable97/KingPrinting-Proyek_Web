@@ -9,7 +9,7 @@
     --primary-yellow: #FFD700;
     --secondary-red: #D32F2F;
     --dark-red: #B71C1C;
-    --dark-blue: #7e1a1a;
+    --dark-blue: #9a2020;
     --light-gray: #F5F5F5;
     --dark-gray: #333333;
 }
@@ -29,6 +29,10 @@ body {
 
 .highlight {
     color: var(--secondary-red);
+}
+
+.highlightsatu {
+    color: rgb(255, 115, 0);
 }
 
 /* Header */
@@ -59,12 +63,7 @@ body {
     font-family: 'Poppins', sans-serif; 
     font-size: 2.2rem; 
     font-weight: 800; 
-    color: #FFD700;
-    text-shadow: 
-        -1px -1px 0 #000,  
-        1px -1px 0 #000,
-        -1px 1px 0 #000,
-        1px 1px 0 #000;
+    color: #000; 
     line-height: 1; 
     padding: 0;
     margin: 0;
@@ -80,7 +79,8 @@ body {
 
 
 .logo-image { 
-    margin-right: 0; 
+    height: 50px; 
+    margin-right: 10px; 
 }
 
 .nav ul {
@@ -136,7 +136,7 @@ body {
 /* Hero Section */
 .hero {
     padding: 10rem 0 5rem;
-    background: linear-gradient(135deg, var(--dark-blue) 0%, #283593 100%);
+    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--dark-gray) 100%);
     color: white;
     position: relative;
     overflow: hidden;
@@ -167,7 +167,7 @@ body {
 }
 
 .hero-content h1 {
-    font-size: 2.8rem;
+    font-size: 3.2rem;
     margin-bottom: 1.5rem;
     line-height: 1.2;
 }
@@ -205,7 +205,7 @@ body {
     max-width: 100%;
     border-radius: 10px;
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-    border: 5px solid var(--primary-yellow);
+    border: 5px solid var(--dark-red);
 }
 
 /* Button Styles */
@@ -388,7 +388,7 @@ section {
 
 /* Keunggulan Section */
 .keunggulan {
-    background: linear-gradient(135deg, var(--dark-blue) 0%, #283593 100%);
+    background: linear-gradient(135deg, var(--dark-gray) 0%, var(--dark-blue) 100%);
     color: white;
 }
 
@@ -402,17 +402,136 @@ section {
     gap: 2rem;
 }
 
+/* --- Styling Produk --- */
+.produk-item {
+    background-color: white;
+    padding: 2.5rem 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    border-top: 4px solid var(--primary-yellow);
+    
+    /* Logika Animasi: */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease;
+}
+
+.produk-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.produk-item.is-visible:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+
+/* --- Styling Cara Kerja --- */
+.step {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    position: relative;
+
+    /* Logika Animasi: */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.step.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* --- Styling Keunggulan --- */
 .keunggulan-item {
     text-align: center;
     padding: 2.5rem 1.5rem;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    backdrop-filter: blur(10px);
-    transition: transform 0.3s;
+    background-color: rgba(255, 255, 255, 0.1); /* STYLING DIKEMBALIKAN */
+    border-radius: 10px;                         /* STYLING DIKEMBALIKAN */
+    backdrop-filter: blur(10px);                 /* STYLING DIKEMBALIKAN */
+
+    /* Logika Animasi: */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-.keunggulan-item:hover {
-    transform: translateY(-5px);
+.keunggulan-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.keunggulan-item.is-visible:hover {
+    transform: translateY(0) scale(1.05); /* Animasi hover membesar */
+}/* --- Styling Produk --- */
+.produk-item {
+    background-color: white;
+    padding: 2.5rem 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    border-top: 4px solid var(--primary-yellow);
+    
+    /* Logika Animasi: */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease;
+}
+
+.produk-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.produk-item.is-visible:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+
+/* --- Styling Cara Kerja --- */
+.step {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    position: relative;
+
+    /* Logika Animasi: */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.step.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* --- Styling Keunggulan --- */
+.keunggulan-item {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    background-color: rgba(255, 255, 255, 0.1); /* STYLING DIKEMBALIKAN */
+    border-radius: 10px;                         /* STYLING DIKEMBALIKAN */
+    backdrop-filter: blur(10px);                 /* STYLING DIKEMBALIKAN */
+
+    /* Logika Animasi: */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.keunggulan-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.keunggulan-item.is-visible:hover {
+    transform: translateY(0) scale(1.05); /* Animasi hover membesar */
 }
 
 .keunggulan-icon {
