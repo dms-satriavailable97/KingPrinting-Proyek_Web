@@ -52,8 +52,6 @@ body {
     padding: 0;
 }
 
-
-
 .logo {
     display: flex;
     align-items: center;
@@ -70,13 +68,11 @@ body {
     display: inline-block; 
 }
 
-
 .logo .logo-text {
     height: 70px;
     display: flex;
     align-items: center;
 }
-
 
 .logo-image { 
     height: 50px; 
@@ -86,6 +82,7 @@ body {
 .nav ul {
     display: flex;
     list-style: none;
+    align-items: center;
 }
 
 .nav ul li {
@@ -115,7 +112,7 @@ body {
     transition: width 0.3s;
 }
 
-.nav ul li a:hover::after {
+.nav ul li a:not(.login-icon):hover::after {
     width: 100%;
 }
 
@@ -190,17 +187,6 @@ body {
     position: relative;
 }
 
-.crown-decoration {
-    position: absolute;
-    top: -20px;
-    right: -10px;
-    font-size: 4rem;
-    color: var(--primary-yellow);
-    opacity: 0.7;
-    transform: rotate(15deg);
-    z-index: 2;
-}
-
 .hero-image img {
     max-width: 100%;
     border-radius: 10px;
@@ -228,26 +214,6 @@ body {
 .btn-primary:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(211, 47, 47, 0.6);
-}
-
-.btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: transparent;
-    color: white;
-    padding: 0.9rem 1.8rem;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s;
-    border: 2px solid white;
-    cursor: pointer;
-}
-
-.btn-secondary:hover {
-    background-color: white;
-    color: var(--dark-blue);
 }
 
 .btn-order {
@@ -309,11 +275,18 @@ section {
     border-radius: 10px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
     text-align: center;
-    transition: transform 0.3s, box-shadow 0.3s;
     border-top: 4px solid var(--primary-yellow);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease;
 }
 
-.produk-item:hover {
+.produk-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.produk-item.is-visible:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
 }
@@ -350,6 +323,14 @@ section {
     text-align: center;
     padding: 2rem 1.5rem;
     position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.step.is-visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .step-number {
@@ -402,59 +383,12 @@ section {
     gap: 2rem;
 }
 
-/* --- Styling Produk --- */
-.produk-item {
-    background-color: white;
-    padding: 2.5rem 2rem;
-    border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-    text-align: center;
-    border-top: 4px solid var(--primary-yellow);
-    
-    /* Logika Animasi: */
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease;
-}
-
-.produk-item.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.produk-item.is-visible:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-}
-
-
-/* --- Styling Cara Kerja --- */
-.step {
-    text-align: center;
-    padding: 2rem 1.5rem;
-    position: relative;
-
-    /* Logika Animasi: */
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.step.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-
-/* --- Styling Keunggulan --- */
 .keunggulan-item {
     text-align: center;
     padding: 2.5rem 1.5rem;
-    background-color: rgba(255, 255, 255, 0.1); /* STYLING DIKEMBALIKAN */
-    border-radius: 10px;                         /* STYLING DIKEMBALIKAN */
-    backdrop-filter: blur(10px);                 /* STYLING DIKEMBALIKAN */
-
-    /* Logika Animasi: */
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.5s ease, transform 0.5s ease;
@@ -466,72 +400,7 @@ section {
 }
 
 .keunggulan-item.is-visible:hover {
-    transform: translateY(0) scale(1.05); /* Animasi hover membesar */
-}/* --- Styling Produk --- */
-.produk-item {
-    background-color: white;
-    padding: 2.5rem 2rem;
-    border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-    text-align: center;
-    border-top: 4px solid var(--primary-yellow);
-    
-    /* Logika Animasi: */
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease;
-}
-
-.produk-item.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.produk-item.is-visible:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-}
-
-
-/* --- Styling Cara Kerja --- */
-.step {
-    text-align: center;
-    padding: 2rem 1.5rem;
-    position: relative;
-
-    /* Logika Animasi: */
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.step.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-
-/* --- Styling Keunggulan --- */
-.keunggulan-item {
-    text-align: center;
-    padding: 2.5rem 1.5rem;
-    background-color: rgba(255, 255, 255, 0.1); /* STYLING DIKEMBALIKAN */
-    border-radius: 10px;                         /* STYLING DIKEMBALIKAN */
-    backdrop-filter: blur(10px);                 /* STYLING DIKEMBALIKAN */
-
-    /* Logika Animasi: */
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.keunggulan-item.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.keunggulan-item.is-visible:hover {
-    transform: translateY(0) scale(1.05); /* Animasi hover membesar */
+    transform: translateY(0) scale(1.05);
 }
 
 .keunggulan-icon {
@@ -547,6 +416,16 @@ section {
 
 .keunggulan-item p {
     opacity: 0.9;
+}
+
+/* Style untuk ikon login */
+.login-icon {
+    font-size: 1.5rem;
+    padding: 0 0.5rem;
+}
+
+.login-icon i {
+    vertical-align: middle;
 }
 
 /* Modal Styles */
@@ -575,7 +454,12 @@ section {
     border-top: 5px solid var(--primary-yellow);
 }
 
-.close {
+#loginModal .modal-content {
+    margin-top: 10vh;
+    max-width: 400px;
+}
+
+.close-order, .close-login {
     position: absolute;
     right: 1.5rem;
     top: 1.5rem;
@@ -585,7 +469,7 @@ section {
     transition: color 0.3s;
 }
 
-.close:hover {
+.close-order:hover, .close-login:hover {
     color: var(--secondary-red);
 }
 
@@ -594,7 +478,6 @@ section {
     align-items: center;
     margin-bottom: 2rem;
 }
-
 
 .modal-header h2 {
     color: var(--dark-blue);
@@ -796,20 +679,12 @@ section {
         grid-template-columns: 1fr;
     }
     
-    .logo-image img {
-        height: 50px;
-    }
-
     .map-iframe {
         height: 300px;
     }
 }
 
 @media (max-width: 480px) {
-    .logo-image img {
-        height: 45px;
-    }
-    
     .hero {
         padding: 8rem 0 3rem;
     }
@@ -844,11 +719,10 @@ section {
     background-color: #128C7E;
 }
 
-/* Tooltip for Sticky WhatsApp Button */
 .whatsapp-sticky::before {
     content: attr(data-tooltip);
     position: absolute;
-    right: 75px; /* Position to the left of the button */
+    right: 75px;
     top: 50%;
     transform: translateY(-50%) translateX(10px);
     white-space: nowrap;
