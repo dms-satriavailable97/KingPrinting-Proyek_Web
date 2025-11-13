@@ -56,23 +56,23 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                     <div class="card-icon" style="color: #38a169;"><i class="fas fa-users"></i></div>
                     <div class="card-info">
                         <p>Total Customers</p>
-                        <h4>5,423</h4>
-                        <span><i class="fas fa-arrow-up"></i> 16% this month</span>
+                        <h4>3</h4>
+                        <span><i class="fas fa-arrow-up"></i> 100% this month</span>
                     </div>
                 </div>
                 <div class="card">
                     <div class="card-icon" style="color: #4299e1;"><i class="fas fa-shopping-cart"></i></div>
                     <div class="card-info">
                         <p>Total Orders</p>
-                        <h4>1,893</h4>
-                        <span class="down"><i class="fas fa-arrow-down"></i> 1% this month</span>
+                        <h4>3</h4>
+                        <span class="up"><i class="fas fa-arrow-up"></i> 100% this month</span>
                     </div>
                 </div>
                  <div class="card">
                     <div class="card-icon" style="color: #d53f8c;"><i class="fas fa-spinner"></i></div>
                     <div class="card-info">
                         <p>Pesanan Diproses</p>
-                        <h4>189</h4>
+                        <h4>1</h4>
                     </div>
                 </div>
             </section>
@@ -97,7 +97,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>#KP001</td>
+                            <td>#KP003</td>
                             <td>Jane Cooper</td>
                             <td>Spanduk & Banner</td>
                             <td>10 Nov 2025</td>
@@ -105,7 +105,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                             <td><button class="action-btn process">Proses</button></td>
                         </tr>
                         <tr>
-                            <td>#KP003</td>
+                            <td>#KP002</td>
                             <td>Ronald Richards</td>
                             <td>Brosur & Flyer</td>
                             <td>09 Nov 2025</td>
@@ -113,7 +113,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                             <td><button class="action-btn complete">Selesai</button></td>
                         </tr>
                         <tr>
-                            <td>#KP004</td>
+                            <td>#KP001</td>
                             <td>Marvin McKinney</td>
                             <td>Kemasan & Dus</td>
                             <td>08 Nov 2025</td>
