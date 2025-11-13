@@ -14,3 +14,11 @@ CREATE TABLE pesanan (
     tanggal_masuk TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(20) DEFAULT 'Tertunda'
 );
+
+CREATE TABLE desain_produk (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    produk VARCHAR(100) NOT NULL,
+    gambar VARCHAR(255) NOT NULL,
+    caption VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
