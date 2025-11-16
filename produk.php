@@ -1,11 +1,19 @@
 <?php
 session_start();
+$admin_href = "#"; // Default: link # untuk memicu modal
+$admin_id = "id=\"loginBtn\""; // Default: ID untuk memicu JavaScript modal
+
+// Jika user terdeteksi sudah login
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+    $admin_href = "dashboard.php"; 
+    $admin_id = ""; 
+}
 require_once 'config.php';
 
 $is_admin = isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true;
 $produk = trim(urldecode($_GET['produk'] ?? ''));
 if (empty($produk)) {
-    header("Location: index.html");
+    header("Location: index.php");
     exit;
 }
 
@@ -91,20 +99,6 @@ $has_desain = count($desains) > 0;
             <img src="assets/crown-logo2.png" alt="King Printing Logo" class="logo-image">
             <div class="logo-text"><span>King Printing</span></div>
         </div>
-        <nav class="nav">
-            <ul>
-                <li><a href="index.html#home">Beranda</a></li>
-                <li><a href="index.html#produk">Produk</a></li>
-                <li><a href="index.html#cara-kerja">Cara Pesan</a></li>
-                <li><a href="index.html#tentang">Tentang Kami</a></li>
-                <li><a href="index.html#kontak">Kontak</a></li>
-                <?php if ($is_admin): ?>
-                    <li><a href="dashboard.php" class="login-icon">Admin</a></li>
-                <?php else: ?>
-                    <li><a href="#" id="loginBtn" class="login-icon">Login</a></li>
-                <?php endif; ?>
-            </ul>
-        </nav>
         <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
     </div>
 </header>
@@ -112,18 +106,38 @@ $has_desain = count($desains) > 0;
 <section class="produk-detail" style="padding: 10rem 0 5rem; background: #f9f9f9;">
     <div class="container">
         <h2 class="section-title">Desain <span class="highlight"><?php echo htmlspecialchars($produk); ?></span></h2>
-        <p>Contoh desain untuk inspirasi. Anda juga bisa kirim desain sendiri!</p>
-        <?php echo $message; ?>
 
         <!-- Admin: Tambah Desain -->
-        <div class="admin-only" style="display: <?php echo $is_admin ? 'block' : 'none'; ?>;">
-            <form method="POST" enctype="multipart/form-data" style="margin:1.5rem 0; padding:1.2rem; background:#f0f0f0; border-radius:12px; display:flex; gap:0.6rem; flex-wrap:wrap;">
-                <input type="hidden" name="action" value="tambah">
-                <input type="text" name="caption" placeholder="Judul desain (opsional)" style="flex:1; min-width:220px; padding:0.7rem; border-radius:8px; border:1px solid #ddd;">
-                <input type="file" name="gambar" accept="image/*" required style="flex:1; min-width:220px;">
-                <button type="submit" style="background:var(--brand-red); color:white; border:none; padding:0.7rem 1.2rem; border-radius:8px; font-weight:600; cursor:pointer;">+ Tambah Desain</button>
-            </form>
+       <div class="header-tambah-desain">
+            <p>Contoh desain untuk inspirasi. Anda juga bisa kirim desain sendiri!</p>
+            
+            <?php if ($is_admin): ?>
+                <button id="bukaModalBtn" class="tombol-tambah-desain">+ Tambah Desain</button>
+            <?php endif; ?>
         </div>
+
+        <?php echo $message; ?>
+
+        <?php if ($is_admin): ?>
+            <div id="tambahDesainModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal-btn">&times;</span>
+                    <h3>Tambah Desain Baru</h3>
+                    
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="action" value="tambah">
+                        
+                        <label for="judul_desain">Judul Desain (opsional)</label>
+                        <input type="text" id="judul_desain" name="caption" placeholder="Contoh: Spanduk Warung Kopi">
+                        
+                        <label for="file_desain">Upload Gambar</label>
+                        <input type="file" id="file_desain" name="gambar" accept="image/*" required>
+                        
+                        <button type="submit" class="tombol-submit-modal">Upload</button>
+                    </form>
+                </div>
+            </div>
+            <?php endif; ?>
 
         <!-- SEMUA PRODUK SEKARANG GRID -->
         <?php if ($has_desain): ?>
@@ -163,14 +177,6 @@ $has_desain = count($desains) > 0;
     </div>
 </section>
 
-<footer class="footer" id="kontak">
-    <div class="container">
-        <div class="map-container">
-            <iframe class="map-iframe" src="https://www.google.com/maps/embed?pb=!4v1762266865140!6m8!1m7!1sWhc2abtYaDzUcfT_F7LnHg!2m2!1d-0.4730531793778449!2d117.1653334981797!3f326.50841155499506!4f-15.840080292808594!5f1.0886293032444474" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-        </div>
-        <div class="footer-bottom"><p>© 2025 King Advertising. All rights reserved.</p></div>
-    </div>
-</footer>
     <script src="script.js"></script>
 
 <script>

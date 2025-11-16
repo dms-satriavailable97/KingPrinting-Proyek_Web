@@ -25,12 +25,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         // Jika tidak sesuai, kembalikan user ke halaman utama
         // Anda bisa menambahkan parameter error di URL untuk menampilkan pesan
-        header("location: index.html?error=loginfailed");
+        header("location: index.php?error=loginfailed");
         exit;
     }
 } else {
     // Jika file ini diakses langsung (bukan melalui POST), arahkan ke halaman utama
-    header("location: index.html");
+    header("location: index.php");
     exit;
 }
 ?>

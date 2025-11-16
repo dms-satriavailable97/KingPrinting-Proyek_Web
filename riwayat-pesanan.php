@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header("location: index.html");
+    header("location: index.php");
     exit;
 }
 require_once 'config.php';
@@ -37,8 +37,12 @@ require_once 'config.php';
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                    <li><a href="pesanan.php"><i class="fas fa-inbox"></i> Pesanan</a></li>
+                    <li><a href="pesanan.php" ><i class="fas fa-inbox"></i> Pesanan</a></li>
                     <li><a href="riwayat-pesanan.php" class="active"><i class="fas fa-history"></i> Riwayat Pesanan</a></li>
+                    
+                    <li><a href="#" id="bukaProdukModalBtn"><i class="fas fa-palette"></i> Lihat Produk </a></li>
+                    <li><a href="index.php"> <i class="fas fa-home"></i> Kembali</a></li>
+
                 </ul>
             </nav>
             <div class="sidebar-footer"><a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
@@ -154,5 +158,53 @@ require_once 'config.php';
         }
     });
     </script>
+
+<div id="pilihProdukModal" class="admin-modal">
+    <div class="admin-modal-content">
+        <span class="admin-modal-close">&times;</span>
+        <h3>Pilih Produk</h3>
+        <p>Pilih produk yang ingin Anda lihat atau kelola desainnya:</p>
+
+        <ul class="admin-produk-list">
+            <li><a href="produk.php?produk=Spanduk & Banner" >Spanduk & Banner</a></li>
+            <li><a href="produk.php?produk=Stiker & Label" >Stiker & Label</a></li>
+            <li><a href="produk.php?produk=Baliho & Billboard" >Baliho & Billboard</a></li>
+            <li><a href="produk.php?produk=Brosur & Flyer" >Brosur & Flyer</a></li>
+            <li><a href="produk.php?produk=Kemasan & Dus" >Kemasan & Dus</a></li>
+            <li><a href="produk.php?produk=Produk Custom" >Produk Custom</a></li>
+        </ul>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Ambil elemen-elemen modal
+    var modal = document.getElementById("pilihProdukModal");
+    var btn = document.getElementById("bukaProdukModalBtn");
+    var span = document.getElementsByClassName("admin-modal-close")[0];
+
+    // Cek dulu apakah tombolnya ada di halaman ini
+    if (btn) {
+        // Saat tombol "Lihat Produk (Admin)" diklik
+        btn.onclick = function(e) {
+            e.preventDefault(); // Mencegah link '#' melompat ke atas
+            modal.style.display = "block";
+        }
+    }
+
+    // Cek apakah modalnya dan tombol closenya ada
+    if (modal && span) {
+        // Saat tombol 'x' diklik
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        // Saat klik di luar area modal
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    }
+});
+</script>
 </body>
 </html>

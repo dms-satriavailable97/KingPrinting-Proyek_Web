@@ -1,3 +1,19 @@
+<?php
+// Memulai session di halaman ini
+session_start();
+
+// Tentukan atribut link untuk tombol Admin
+$admin_href = "#"; // Default: link # untuk memicu modal
+$admin_id = "id=\"loginBtn\""; // Default: ID untuk memicu JavaScript modal
+
+// Jika user terdeteksi sudah login (session 'loggedin' ada dan true)
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+    // Ubah link menjadi ke dashboard
+    $admin_href = "dashboard.php"; 
+    $admin_id = ""; 
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -24,9 +40,8 @@
                     <li><a href="#home">Beranda</a></li>
                     <li><a href="#produk">Produk</a></li>
                     <li><a href="#cara-kerja">Cara Pesan</a></li>
-                    <li><a href="#tentang">Tentang Kami</a></li>
                     <li><a href="#kontak">Kontak</a></li>
-                    <li><a href="#" id="loginBtn" class="login-icon"><i class="fas fa-user-circle"></i></a></li>
+                    <li><a href="<?php echo $admin_href; ?>" <?php echo $admin_id; ?> class="login-icon"><i class="fas fa-user-circle"></i></a></li>
                 </ul>
             </nav>
             <div class="hamburger" id="hamburger">
@@ -66,7 +81,7 @@
             <div class="produk-item">
                 <div class="produk-icon"><i class="fas fa-sticky-note"></i></div>
                 <h3>Stiker & Label</h3>
-                <p>Stiker berkualitas untuk produk, kemasan, atau promosi dengan berbagai pilihan bahan dan finishing.</p>
+                <p>Stiker berkualitas untuk produk, kemasan, atau promosi dengan berbagai pilihan bahan ternama dan finishing.</p>
                 <button class="btn-order" data-produk="Stiker & Label">Pesan Sekarang</button>
                 <a href="produk.php?produk=Stiker & Label" class="btn-view-design">Lihat Desain</a>
             </div>

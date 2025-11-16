@@ -917,3 +917,152 @@ section {
     width: 250px !important;
     height: auto;
 }
+
+/* --- Style untuk Tombol Tambah Desain --- */
+.header-tambah-desain {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px; /* Anda bisa sesuaikan jarak ini */
+}
+
+.header-tambah-desain p {
+    margin: 0; /* Menghapus margin bawaan paragraf */
+    font-size: 1rem;
+    color: #555;
+}
+
+.tombol-tambah-desain {
+    background-color: var(--brand-red, #dc3545); /* Pakai var(--brand-red) Anda */
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+.tombol-tambah-desain:hover {
+    opacity: 0.8;
+}
+
+
+/* --- Style untuk Modal Popup --- */
+
+/* Latar belakang modal (gelap) */
+.modal {
+    display: none; /* Tersembunyi secara default */
+    position: fixed; 
+    z-index: 1000; /* Tampil di atas segalanya */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5); /* Hitam transparan */
+}
+
+/* Kotak konten modal */
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; /* 10% dari atas dan tengah horizontal */
+    padding: 25px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 500px; /* Lebar maksimum */
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: animatetop 0.4s;
+}
+
+/* Animasi popup */
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+/* Tombol Close (X) */
+.close-modal-btn {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-modal-btn:hover,
+.close-modal-btn:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Style form di dalam modal */
+.modal-content h3 {
+    margin-top: 0;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.modal-content form label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.modal-content form input[type="text"],
+.modal-content form input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box; /* Penting! */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.modal-content form input[type="file"] {
+    padding: 5px;
+}
+
+.tombol-submit-modal {
+    background-color: #198754; /* Hijau */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.tombol-submit-modal:hover {
+    background-color: #157347;
+}
+
+/* --- Style untuk Separator Shortcut di Sidebar --- */
+.sidebar-nav ul .nav-separator {
+    /* Memberi jarak atas dan bawah, dan sedikit ke kanan */
+    padding: 20px 25px 10px 25px; 
+    /* Ini adalah <li>, jadi kita matikan efek hover-nya */
+    pointer-events: none; 
+}
+
+.sidebar-nav ul .nav-separator .separator-text {
+    font-size: 0.75rem; /* Ukuran font kecil (12px) */
+    color: #8a9fc1;    /* Warna abu-abu kebiruan (sesuaikan jika perlu) */
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Ini opsional: memberi sedikit penanda pada link shortcut
+   (link yang dibuka di tab baru) saat di-hover 
+*/
+.sidebar-nav ul li a[target="_blank"]:hover {
+    background-color: #3b5a9a; /* Warna hover sedikit beda */
+}

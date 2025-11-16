@@ -157,3 +157,37 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('scroll', animateOnScroll);
     animateOnScroll();
 });
+
+// --- Logika Modal Tambah Desain ---
+
+// Cek saat halaman selesai dimuat
+document.addEventListener("DOMContentLoaded", function() {
+
+    // Dapatkan elemen-elemen modal
+    var modal = document.getElementById("tambahDesainModal");
+    var btn = document.getElementById("bukaModalBtn");
+    var span = document.getElementsByClassName("close-modal-btn")[0];
+
+    // Cek apakah elemen-elemen tersebut ada di halaman ini
+    // Ini agar script tidak error di halaman lain yang tidak punya tombol/modal
+    // (Penting karena tombol & modal ini hanya ada untuk admin)
+    if (modal && btn && span) {
+        
+        // Saat tombol "+ Tambah Desain" diklik, tampilkan modal
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // Saat tombol 'x' (span) diklik, tutup modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Saat pengguna mengklik di luar area modal (di latar belakang gelap), tutup juga modalnya
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    }
+});

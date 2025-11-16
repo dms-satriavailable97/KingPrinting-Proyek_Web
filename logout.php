@@ -9,6 +9,6 @@ $_SESSION = array();
 session_destroy();
 
 // Arahkan (redirect) user kembali ke halaman utama
-header("location: index.html");
+header("location: index.php");
 exit;
 ?>
