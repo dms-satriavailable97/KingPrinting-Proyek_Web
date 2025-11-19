@@ -1,11 +1,37 @@
 <?php
 // Memulai session
 session_start();
+// Include koneksi database
+require_once 'config.php';
 
 // Memeriksa apakah user sudah login. Jika belum, tendang ke halaman utama.
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("location: index.php");
     exit;
+}
+
+// Menghitung jumlah pesanan dengan status 'Tertunda'
+$sql_tertunda = "SELECT COUNT(*) as count FROM pesanan WHERE status = 'Tertunda'";
+$result_tertunda = $conn->query($sql_tertunda);
+$jumlah_tertunda = 0;
+if ($result_tertunda) {
+    $jumlah_tertunda = $result_tertunda->fetch_assoc()['count'];
+}
+
+// Menghitung jumlah total pelanggan (contoh: unik dari nama_pemesan)
+$sql_customers = "SELECT COUNT(DISTINCT nama_pemesan) as count FROM pesanan";
+$result_customers = $conn->query($sql_customers);
+$total_customers = 0;
+if ($result_customers) {
+    $total_customers = $result_customers->fetch_assoc()['count'];
+}
+
+// Menghitung jumlah total pesanan
+$sql_orders = "SELECT COUNT(*) as count FROM pesanan";
+$result_orders = $conn->query($sql_orders);
+$total_orders = 0;
+if ($result_orders) {
+    $total_orders = $result_orders->fetch_assoc()['count'];
 }
 ?>
 
@@ -18,28 +44,45 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
+    <style>
+        /* === CSS UNTUK MODAL & STATUS INTERAKTIF (FIX) === */
+        /* Modal Detail */
+        .detail-modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
+        .detail-modal-content { background-color: #fefefe; margin: 10% auto; padding: 25px 35px; border-radius: 15px; width: 80%; max-width: 600px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: animatetop 0.4s; }
+        @keyframes animatetop { from {top: -300px; opacity: 0} to {top: 0; opacity: 1} }
+        .detail-modal-header { padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .detail-modal-header h2 { margin: 0; font-size: 1.6rem; color: var(--brand-dark-red); }
+        .close-detail-modal { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 25px; }
+        .detail-item { font-size: 0.95rem; }
+        .detail-item strong { display: block; color: #888; font-weight: 500; margin-bottom: 4px; font-size: 0.85rem; }
+        .detail-item span { color: var(--text-primary); font-weight: 500; }
+        .detail-item.full-width { grid-column: 1 / -1; }
+        .detail-item textarea { width: 100%; height: 100px; background: #f9f9f9; border: 1px solid #eee; border-radius: 5px; padding: 10px; font-family: 'Poppins', sans-serif; resize: vertical; }
+        
+        /* Dropdown Status */
+        .status-wrapper { position: relative; display: inline-block; }
+        .status.interactive { cursor: pointer; transition: background-color 0.2s, color 0.2s; }
+        .status.interactive:hover { filter: brightness(1.1); }
+        .status-dropdown { display: none; position: absolute; top: 100%; left: 0; background-color: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 120px; list-style: none; padding: 5px 0; z-index: 10; margin-top: 5px; }
+        .status-dropdown li { padding: 8px 15px; font-size: 0.9rem; cursor: pointer; transition: background-color 0.2s; }
+        .status-dropdown li:hover { background-color: #f5f5f5; }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <i class="fas fa-crown"></i>
-                <h2>King Printing</h2>
-            </div>
+            <div class="sidebar-header"><i class="fas fa-crown"></i><h2>King Printing</h2></div>
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="dashboard.php" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                     <li><a href="pesanan.php"><i class="fas fa-inbox"></i> Pesanan</a></li>
                     <li><a href="riwayat-pesanan.php"><i class="fas fa-history"></i> Riwayat Pesanan</a></li>
-                    
                     <li><a href="#" id="bukaProdukModalBtn"><i class="fas fa-palette"></i> Lihat Produk</a></li>
                     <li><a href="index.php"> <i class="fas fa-home"></i> Kembali</a></li>
-
                 </ul>
             </nav>
-            <div class="sidebar-footer">
-                <a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            </div>
+            <div class="sidebar-footer"><a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
         </aside>
         <main class="main-content">
             <header class="main-header">
@@ -59,35 +102,28 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                     <div class="card-icon" style="color: #38a169;"><i class="fas fa-users"></i></div>
                     <div class="card-info">
                         <p>Total Customers</p>
-                        <h4>3</h4>
-                        <span><i class="fas fa-arrow-up"></i> 100% this month</span>
+                        <h4><?php echo $total_customers; ?></h4>
                     </div>
                 </div>
                 <div class="card">
                     <div class="card-icon" style="color: #4299e1;"><i class="fas fa-shopping-cart"></i></div>
                     <div class="card-info">
                         <p>Total Orders</p>
-                        <h4>3</h4>
-                        <span class="up"><i class="fas fa-arrow-up"></i> 100% this month</span>
+                        <h4><?php echo $total_orders; ?></h4>
                     </div>
                 </div>
                  <div class="card">
-                    <div class="card-icon" style="color: #d53f8c;"><i class="fas fa-spinner"></i></div>
+                    <div class="card-icon" style="color: #ffc700;"><i class="fas fa-clock"></i></div>
                     <div class="card-info">
-                        <p>Pesanan Diproses</p>
-                        <h4>1</h4>
+                        <p>Pesanan Tertunda</p>
+                        <h4><?php echo $jumlah_tertunda; ?></h4>
                     </div>
                 </div>
             </section>
 
             <section class="customers-table">
-                <div class="table-header">
-                    <h3>Ringkasan Pesanan Terbaru</h3>
-                    <div class="table-actions">
-                         <span>Urutkan: Terbaru <i class="fas fa-chevron-down"></i></span>
-                    </div>
-                </div>
-                <table>
+                <div class="table-header"><h3>Ringkasan Pesanan Terbaru</h3></div>
+                <table id="ordersTable">
                     <thead>
                         <tr>
                             <th>ID Pesanan</th>
@@ -99,79 +135,150 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>#KP003</td>
-                            <td>Jane Cooper</td>
-                            <td>Spanduk & Banner</td>
-                            <td>10 Nov 2025</td>
-                            <td><span class="status new">Baru</span></td>
-                            <td><button class="action-btn process">Proses</button></td>
-                        </tr>
-                        <tr>
-                            <td>#KP002</td>
-                            <td>Ronald Richards</td>
-                            <td>Brosur & Flyer</td>
-                            <td>09 Nov 2025</td>
-                            <td><span class="status processing">Diproses</span></td>
-                            <td><button class="action-btn complete">Selesai</button></td>
-                        </tr>
-                        <tr>
-                            <td>#KP001</td>
-                            <td>Marvin McKinney</td>
-                            <td>Kemasan & Dus</td>
-                            <td>08 Nov 2025</td>
-                            <td><span class="status completed">Selesai</span></td>
-                            <td><button class="action-btn detail">Detail</button></td>
-                        </tr>
+                        <?php
+                        $sql = "SELECT id, nama_pemesan, produk, tanggal_masuk, status FROM pesanan WHERE status = 'Tertunda' ORDER BY tanggal_masuk DESC LIMIT 5";
+                        $result = $conn->query($sql);
+
+                        if ($result->num_rows > 0) {
+                            while($row = $result->fetch_assoc()) {
+                                echo "<tr data-id='" . $row['id'] . "'>";
+                                echo "<td>#KP" . str_pad($row['id'], 3, '0', STR_PAD_LEFT) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['nama_pemesan']) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['produk']) . "</td>";
+                                echo "<td>" . date('d M Y', strtotime($row['tanggal_masuk'])) . "</td>";
+                                echo "<td>
+                                        <div class='status-wrapper'>
+                                            <span class='status interactive tertunda'>Tertunda</span>
+                                            <ul class='status-dropdown'></ul>
+                                        </div>
+                                      </td>";
+                                echo "<td><button class='action-btn detail'>Detail</button></td>";
+                                echo "</tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='6' style='text-align:center; padding: 2rem;'>Tidak ada pesanan yang perlu diproses.</td></tr>";
+                        }
+                        ?>
                     </tbody>
                 </table>
-                 <div class="table-footer">
-                    <span>Menampilkan ringkasan pesanan</span>
-                 </div>
+                 <div class="table-footer"><span>Menampilkan pesanan tertunda terbaru</span></div>
             </section>
         </main>
     </div>
 
-<div id="pilihProdukModal" class="admin-modal">
-    <div class="admin-modal-content">
-        <span class="admin-modal-close">&times;</span>
-        <h3>Pilih Produk</h3>
-        <p>Pilih produk yang ingin Anda lihat atau kelola desainnya:</p>
-        
-        <ul class="admin-produk-list">
-            <li><a href="produk.php?produk=Spanduk & Banner">Spanduk & Banner</a></li>
-            <li><a href="produk.php?produk=Stiker & Label" >Stiker & Label</a></li>
-            <li><a href="produk.php?produk=Baliho & Billboard" >Baliho & Billboard</a></li>
-            <li><a href="produk.php?produk=Brosur & Flyer" >Brosur & Flyer</a></li>
-            <li><a href="produk.php?produk=Kemasan & Dus" >Kemasan & Dus</a></li>
-            <li><a href="produk.php?produk=Produk Custom" >Produk Custom</a></li>
-        </ul>
+    <!-- Modal untuk Detail Pesanan -->
+    <div id="detailModal" class="detail-modal">
+        <div class="detail-modal-content">
+            <div class="detail-modal-header">
+                <h2 id="detailModalTitle">Detail Pesanan</h2>
+                <span class="close-detail-modal">&times;</span>
+            </div>
+            <div id="detailModalBody" class="detail-grid"><!-- Konten detail di-load di sini --></div>
+        </div>
     </div>
-</div>
+
+    <div id="pilihProdukModal" class="admin-modal"><!-- ... Konten Modal Produk ... --></div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Ambil elemen-elemen modal
-    var modal = document.getElementById("pilihProdukModal");
-    var btn = document.getElementById("bukaProdukModalBtn");
-    var span = document.getElementsByClassName("admin-modal-close")[0];
+    const table = document.getElementById('ordersTable');
+    const detailModal = document.getElementById('detailModal');
+    const closeDetailModal = document.querySelector('.close-detail-modal');
+    let activeDropdown = null;
 
-    // Saat tombol "Lihat Produk (Admin)" diklik
-    btn.onclick = function(e) {
-        e.preventDefault(); // Mencegah link '#' melompat ke atas
-        modal.style.display = "block";
+    // --- FUNGSI UNTUK MENGUBAH STATUS PESANAN ---
+    function updateOrderStatus(orderId, newStatus) {
+        const formData = new FormData();
+        formData.append('id', orderId);
+        formData.append('status', newStatus);
+
+        fetch('update-status.php', { method: 'POST', body: formData })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const row = document.querySelector(`tr[data-id='${orderId}']`);
+                if (row) {
+                    row.style.transition = 'opacity 0.5s ease';
+                    row.style.opacity = '0';
+                    setTimeout(() => window.location.reload(), 500); // Reload halaman untuk update stats
+                }
+            } else {
+                alert('Gagal: ' + data.message);
+            }
+        }).catch(() => alert('Terjadi kesalahan jaringan.'));
     }
 
-    // Saat tombol 'x' diklik
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
+    // --- EVENT LISTENER UTAMA PADA TABEL ---
+    table.addEventListener('click', function(e) {
+        const statusTrigger = e.target.closest('.status.interactive');
+        const dropdownItem = e.target.closest('.status-dropdown li');
+        const detailButton = e.target.closest('.action-btn.detail');
 
-    // Saat klik di luar area modal
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
+        // --- Logika untuk membuka dropdown status ---
+        if (statusTrigger) {
+            const dropdown = statusTrigger.nextElementSibling;
+            if (activeDropdown && activeDropdown !== dropdown) activeDropdown.style.display = 'none';
+            dropdown.innerHTML = `<li data-new-status="Selesai">Selesai</li>`;
+            const isVisible = dropdown.style.display === 'block';
+            dropdown.style.display = isVisible ? 'none' : 'block';
+            activeDropdown = isVisible ? null : dropdown;
+            return;
         }
+
+        // --- Logika untuk memilih item dari dropdown ---
+        if (dropdownItem) {
+            const newStatus = dropdownItem.dataset.newStatus;
+            const orderId = dropdownItem.closest('tr').dataset.id;
+            updateOrderStatus(orderId, newStatus);
+            if (activeDropdown) activeDropdown.style.display = 'none';
+            activeDropdown = null;
+            return;
+        }
+
+        // --- Logika untuk tombol "Detail" ---
+        if (detailButton) {
+            const orderId = detailButton.closest('tr').getAttribute('data-id');
+            if (orderId) {
+                fetch(`get-order-details.php?id=${orderId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const order = data.order;
+                        document.getElementById('detailModalTitle').textContent = `Detail Pesanan #${order.id_formatted}`;
+                        const modalBody = document.getElementById('detailModalBody');
+                        modalBody.innerHTML = `
+                            <div class="detail-item"><strong>Nama Pemesan</strong><span>${order.nama_pemesan}</span></div>
+                            <div class="detail-item"><strong>Telepon</strong><span>${order.telepon}</span></div>
+                            <div class="detail-item"><strong>Produk</strong><span>${order.produk}</span></div>
+                            <div class="detail-item"><strong>Tanggal Masuk</strong><span>${order.tanggal_masuk}</span></div>
+                            <div class="detail-item"><strong>Ukuran</strong><span>${order.ukuran || '-'} cm</span></div>
+                            <div class="detail-item"><strong>Bahan</strong><span>${order.bahan || '-'}</span></div>
+                            <div class="detail-item"><strong>Jumlah</strong><span>${order.jumlah} pcs</span></div>
+                            <div class="detail-item"><strong>Status</strong><span class="status tertunda">${order.status}</span></div>
+                            <div class="detail-item full-width"><strong>Catatan</strong><textarea readonly>${order.catatan || 'Tidak ada catatan.'}</textarea></div>
+                        `;
+                        detailModal.style.display = 'block';
+                    } else {
+                        alert('Gagal memuat detail: ' + data.message);
+                    }
+                }).catch(() => alert('Terjadi kesalahan jaringan.'));
+            }
+            return;
+        }
+    });
+
+    // --- EVENT LISTENER UNTUK MENUTUP DROPDOWN/MODAL ---
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.status-wrapper') && activeDropdown) {
+            activeDropdown.style.display = 'none';
+            activeDropdown = null;
+        }
+    });
+    if(closeDetailModal) {
+        closeDetailModal.onclick = () => { detailModal.style.display = "none"; }
+    }
+    window.onclick = (event) => {
+        if (event.target == detailModal) { detailModal.style.display = "none"; }
     }
 });
 </script>

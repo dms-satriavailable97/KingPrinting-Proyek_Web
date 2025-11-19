@@ -16,7 +16,8 @@ require_once 'config.php';
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
     <style>
-        /* Style untuk Dropdown Status Interaktif */
+        /* --- CSS Tambahan --- */
+        /* Dropdown Status */
         .status-wrapper { position: relative; display: inline-block; }
         .status.interactive { cursor: pointer; transition: background-color 0.2s, color 0.2s; }
         .status.interactive:hover { filter: brightness(1.1); }
@@ -24,18 +25,36 @@ require_once 'config.php';
         .status-dropdown li { padding: 8px 15px; font-size: 0.9rem; cursor: pointer; transition: background-color 0.2s; }
         .status-dropdown li:hover { background-color: #f5f5f5; }
 
-        /* Style untuk Modal Detail (sama seperti di riwayat) */
-        .detail-modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
-        .detail-modal-content { background-color: #fefefe; margin: 10% auto; padding: 25px 35px; border-radius: 15px; width: 80%; max-width: 600px; position: relative; }
+        /* Modal Base */
+        .custom-modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
+        .custom-modal-content { background-color: #fefefe; margin: 15% auto; padding: 25px 35px; border-radius: 15px; width: 90%; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: animatetop 0.4s; }
+        @keyframes animatetop { from {top: -300px; opacity: 0} to {top: 0; opacity: 1} }
+        
+        /* Modal Detail */
+        .detail-modal-content { max-width: 600px; }
         .detail-modal-header { padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .detail-modal-header h2 { margin: 0; font-size: 1.6rem; color: var(--brand-dark-red); }
-        .close-detail-modal { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close-modal { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
         .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 25px; }
         .detail-item { font-size: 0.95rem; }
         .detail-item strong { display: block; color: #888; font-weight: 500; margin-bottom: 4px; font-size: 0.85rem; }
         .detail-item span { color: var(--text-primary); font-weight: 500; }
         .detail-item.full-width { grid-column: 1 / -1; }
         .detail-item textarea { width: 100%; height: 100px; background: #f9f9f9; border: 1px solid #eee; border-radius: 5px; padding: 10px; font-family: 'Poppins', sans-serif; resize: vertical; }
+        
+        /* Modal Konfirmasi Hapus */
+        .confirm-modal-content { max-width: 420px; text-align: center; }
+        .confirm-icon { font-size: 3.5rem; color: #e74c3c; margin-bottom: 1rem; }
+        .confirm-modal-content h3 { font-size: 1.5rem; color: #333; margin-bottom: 0.5rem; }
+        .confirm-modal-content p { color: #666; margin-bottom: 1.5rem; line-height: 1.5; }
+        .confirm-actions { display: flex; justify-content: center; gap: 1rem; }
+
+        /* Tombol Aksi */
+        .action-cell { display: flex; gap: 0.8rem; align-items: center; justify-content: flex-start; }
+        .action-btn.delete { background-color: #e74c3c; padding: 0.4rem 0.7rem; }
+        .action-btn.delete:hover { background-color: #c0392b; }
+        .action-btn.delete i { color: white; font-size: 0.8rem; }
+        #ordersTable th:last-child { text-align: left; }
     </style>
 </head>
 <body>
@@ -93,7 +112,10 @@ require_once 'config.php';
                                             <ul class='status-dropdown'></ul>
                                         </div>
                                       </td>";
-                                echo "<td><button class='action-btn detail'>Detail</button></td>";
+                                echo "<td class='action-cell'>
+                                        <button class='action-btn detail'>Detail</button>
+                                        <button class='action-btn delete'><i class='fas fa-trash'></i></button>
+                                      </td>";
                                 echo "</tr>";
                             }
                         } else {
@@ -107,16 +129,44 @@ require_once 'config.php';
         </main>
     </div>
 
-    <!-- Modal untuk Detail Pesanan (ditambahkan di sini) -->
-    <div id="detailModal" class="detail-modal">
-        <div class="detail-modal-content">
+    <!-- Modal untuk Detail Pesanan -->
+    <div id="detailModal" class="custom-modal">
+        <div class="custom-modal-content detail-modal-content">
             <div class="detail-modal-header">
                 <h2 id="detailModalTitle">Detail Pesanan</h2>
-                <span class="close-detail-modal">&times;</span>
+                <span class="close-modal">&times;</span>
             </div>
-            <div id="detailModalBody" class="detail-grid">
-                <!-- Konten detail akan di-load di sini oleh JavaScript -->
+            <div id="detailModalBody" class="detail-grid"><!-- Konten detail di-load di sini --></div>
+        </div>
+    </div>
+
+    <!-- Modal untuk Konfirmasi Hapus -->
+    <div id="confirmDeleteModal" class="custom-modal">
+        <div class="custom-modal-content confirm-modal-content">
+            <div class="confirm-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3>Konfirmasi Hapus</h3>
+            <p>Anda yakin ingin menghapus pesanan ini secara permanen? Tindakan ini tidak dapat dibatalkan.</p>
+            <div class="confirm-actions">
+                <button id="confirmDeleteBtn" class="action-btn delete">Ya, Hapus</button>
+                <button id="cancelDeleteBtn" class="action-btn detail">Batal</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal untuk Pilih Produk -->
+    <div id="pilihProdukModal" class="admin-modal">
+        <div class="admin-modal-content">
+            <span class="admin-modal-close">&times;</span>
+            <h3>Pilih Produk</h3>
+            <p>Pilih produk yang ingin Anda lihat atau kelola desainnya:</p>
+            <ul class="admin-produk-list">
+                <li><a href="produk.php?produk=Spanduk & Banner" >Spanduk & Banner</a></li>
+                <li><a href="produk.php?produk=Stiker & Label" >Stiker & Label</a></li>
+                <li><a href="produk.php?produk=Baliho & Billboard" >Baliho & Billboard</a></li>
+                <li><a href="produk.php?produk=Brosur & Flyer" >Brosur & Flyer</a></li>
+                <li><a href="produk.php?produk=Kemasan & Dus" >Kemasan & Dus</a></li>
+                <li><a href="produk.php?produk=Produk Custom" >Produk Custom</a></li>
+            </ul>
         </div>
     </div>
 
@@ -124,10 +174,14 @@ require_once 'config.php';
 document.addEventListener('DOMContentLoaded', function() {
     const table = document.getElementById('ordersTable');
     const detailModal = document.getElementById('detailModal');
-    const closeDetailModal = document.querySelector('.close-detail-modal');
+    const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+    const closeButtons = document.querySelectorAll('.close-modal');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
     let activeDropdown = null;
+    let orderIdToDelete = null;
 
-    // --- FUNGSI UNTUK MENGUBAH STATUS PESANAN ---
+    // --- FUNGSI UNTUK MENGUBAH STATUS ---
     function updateOrderStatus(orderId, newStatus, statusElement) {
         statusElement.textContent = '...';
         const formData = new FormData();
@@ -152,13 +206,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // --- FUNGSI UNTUK EKSEKUSI PENGHAPUSAN ---
+    function executeDelete(orderId) {
+        const formData = new FormData();
+        formData.append('id', orderId);
+
+        fetch('delete-order.php', { method: 'POST', body: formData })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const row = document.querySelector(`tr[data-id='${orderId}']`);
+                if (row) {
+                    row.style.transition = 'opacity 0.5s ease';
+                    row.style.opacity = '0';
+                    setTimeout(() => row.remove(), 500);
+                }
+            } else {
+                alert('Gagal menghapus: ' + data.message);
+            }
+        })
+        .catch(() => alert('Terjadi kesalahan jaringan saat menghapus.'))
+        .finally(() => {
+            confirmDeleteModal.style.display = 'none';
+            orderIdToDelete = null;
+        });
+    }
+
     // --- EVENT LISTENER UTAMA PADA TABEL ---
     table.addEventListener('click', function(e) {
         const statusTrigger = e.target.closest('.status.interactive');
         const dropdownItem = e.target.closest('.status-dropdown li');
         const detailButton = e.target.closest('.action-btn.detail');
+        const deleteButton = e.target.closest('.action-btn.delete');
 
-        // --- Logika untuk membuka dropdown status ---
+        // Logika untuk membuka dropdown status
         if (statusTrigger) {
             const dropdown = statusTrigger.nextElementSibling;
             if (activeDropdown && activeDropdown !== dropdown) activeDropdown.style.display = 'none';
@@ -169,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // --- Logika untuk memilih item dari dropdown ---
+        // Logika untuk memilih item dari dropdown
         if (dropdownItem) {
             const newStatus = dropdownItem.dataset.newStatus;
             const statusElement = dropdownItem.closest('.status-wrapper').querySelector('.status.interactive');
@@ -180,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // --- Logika untuk tombol "Detail" (BARU DITAMBAHKAN) ---
+        // Logika untuk tombol "Detail"
         if (detailButton) {
             const orderId = detailButton.closest('tr').getAttribute('data-id');
             if (orderId) {
@@ -213,68 +294,59 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return;
         }
-    });
 
-    // --- EVENT LISTENER UNTUK MENUTUP DROPDOWN/MODAL ---
-    document.addEventListener('click', function(e) {
-        // Menutup dropdown jika klik di luar
-        if (!e.target.closest('.status-wrapper') && activeDropdown) {
-            activeDropdown.style.display = 'none';
-            activeDropdown = null;
+        // Logika untuk tombol "Delete"
+        if (deleteButton) {
+            orderIdToDelete = deleteButton.closest('tr').getAttribute('data-id');
+            confirmDeleteModal.style.display = 'block';
+            return;
         }
     });
-    // Menutup modal jika klik tombol (x) atau di luar area modal
-    if(closeDetailModal) {
-        closeDetailModal.onclick = () => { detailModal.style.display = "none"; }
-    }
+
+    // --- EVENT LISTENERS UNTUK MODAL ---
+    // Tombol (x) di semua modal
+    closeButtons.forEach(btn => {
+        btn.onclick = () => {
+            btn.closest('.custom-modal').style.display = 'none';
+        }
+    });
+
+    // Tombol Batal di modal konfirmasi
+    cancelDeleteBtn.onclick = () => {
+        confirmDeleteModal.style.display = 'none';
+        orderIdToDelete = null;
+    };
+
+    // Tombol "Ya, Hapus" di modal konfirmasi
+    confirmDeleteBtn.onclick = () => {
+        if (orderIdToDelete) {
+            executeDelete(orderIdToDelete);
+        }
+    };
+
+    // Klik di luar area modal
     window.onclick = (event) => {
-        if (event.target == detailModal) { detailModal.style.display = "none"; }
-    }
-});
-</script>
-<div id="pilihProdukModal" class="admin-modal">
-    <div class="admin-modal-content">
-        <span class="admin-modal-close">&times;</span>
-        <h3>Pilih Produk</h3>
-        <p>Pilih produk yang ingin Anda lihat atau kelola desainnya:</p>
-
-        <ul class="admin-produk-list">
-            <li><a href="produk.php?produk=Spanduk & Banner" >Spanduk & Banner</a></li>
-            <li><a href="produk.php?produk=Stiker & Label" >Stiker & Label</a></li>
-            <li><a href="produk.php?produk=Baliho & Billboard" >Baliho & Billboard</a></li>
-            <li><a href="produk.php?produk=Brosur & Flyer" >Brosur & Flyer</a></li>
-            <li><a href="produk.php?produk=Kemasan & Dus" >Kemasan & Dus</a></li>
-            <li><a href="produk.php?produk=Produk Custom" >Produk Custom</a></li>
-        </ul>
-    </div>
-</div>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Ambil elemen-elemen modal
-    var modal = document.getElementById("pilihProdukModal");
-    var btn = document.getElementById("bukaProdukModalBtn");
-    var span = document.getElementsByClassName("admin-modal-close")[0];
-
-    // Cek dulu apakah tombolnya ada di halaman ini
-    if (btn) {
-        // Saat tombol "Lihat Produk (Admin)" diklik
-        btn.onclick = function(e) {
-            e.preventDefault(); // Mencegah link '#' melompat ke atas
-            modal.style.display = "block";
+        if (event.target.classList.contains('custom-modal')) {
+            event.target.style.display = 'none';
+        }
+        if (event.target == document.getElementById("pilihProdukModal")) {
+            document.getElementById("pilihProdukModal").style.display = "none";
         }
     }
 
-    // Cek apakah modalnya dan tombol closenya ada
-    if (modal && span) {
-        // Saat tombol 'x' diklik
-        span.onclick = function() {
-            modal.style.display = "none";
+    // --- EVENT LISTENER UNTUK MODAL PRODUK ---
+    const produkModal = document.getElementById("pilihProdukModal");
+    const btnProduk = document.getElementById("bukaProdukModalBtn");
+    const spanProduk = document.getElementsByClassName("admin-modal-close")[0];
+    if (btnProduk) {
+        btnProduk.onclick = function(e) {
+            e.preventDefault();
+            produkModal.style.display = "block";
         }
-        // Saat klik di luar area modal
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
+    }
+    if (spanProduk) {
+        spanProduk.onclick = function() {
+            produkModal.style.display = "none";
         }
     }
 });
