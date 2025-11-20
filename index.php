@@ -178,25 +178,45 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
             <span class="close-order">×</span>
             <div class="modal-header"><h2>Pesan Sekarang</h2></div>
             <form id="orderForm">
-                <div class="form-group"><label for="produkName">Produk:</label><input type="text" id="produkName" name="produk" readonly></div>
-                <div class="form-group"><label for="ukuran">Ukuran (cm):</label><input type="text" id="ukuran" name="ukuran" placeholder="Contoh: 100x200"></div>
-                <div class="form-group">
-                    <label for="bahan">Bahan:</label>
-                    <select id="bahan" name="bahan">
-                        <option value="">Pilih Bahan</option>
-                        <option value="Vinyl">Vinyl</option>
-                        <option value="Flexy China">Flexy China</option>
-                        <option value="Kanvas">Kanvas</option>
-                        <option value="Art Paper">Art Paper</option>
-                        <option value="Sticker Vinyl">Sticker Vinyl</option>
-                    </select>
+                <input type="hidden" id="produkName" name="produk">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nama">Nama Pemesan:</label>
+                        <input type="text" id="nama" name="nama" required placeholder="Nama Anda">
+                    </div>
+                    <div class="form-group">
+                        <label for="telepon">Nomor WhatsApp:</label>
+                        <input type="tel" id="telepon" name="telepon" required placeholder="08xx-xxxx-xxxx">
+                    </div>
                 </div>
-                <div class="form-group"><label for="jumlah">Jumlah:</label><input type="number" id="jumlah" name="jumlah" min="1" value="1"></div>
-                <div class="form-group"><label for="catatan">Catatan Tambahan:</label><textarea id="catatan" name="catatan" rows="3" placeholder="Deskripsi tambahan atau permintaan khusus"></textarea></div>
-                <div class="form-group"><label for="nama">Nama:</label><input type="text" id="nama" name="nama" required></div>
-                <div class="form-group"><label for="telepon">Nomor Telepon:</label><input type="tel" id="telepon" name="telepon" required></div>
-                <button type="submit" class="btn-primary">
-                    <i class="fab fa-whatsapp"></i> Kirim ke WhatsApp
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;"> <label for="ukuran">Ukuran (cm):</label>
+                        <input type="text" id="ukuran" name="ukuran" placeholder="Contoh: 100x200">
+                    </div>
+                    <div class="form-group" style="flex: 2;"> <label for="bahan">Pilih Bahan:</label>
+                        <select id="bahan" name="bahan">
+                            <option value="">-- Pilih Bahan --</option>
+                            <option value="Vinyl">Vinyl</option>
+                            <option value="Flexy China">Flexy China</option>
+                            <option value="Kanvas">Kanvas</option>
+                            <option value="Art Paper">Art Paper</option>
+                            <option value="Sticker Vinyl">Sticker Vinyl</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;"> <label for="jumlah">Jumlah:</label>
+                        <input type="number" id="jumlah" name="jumlah" min="1" value="1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="catatan">Catatan Tambahan:</label>
+                    <textarea id="catatan" name="catatan" rows="2" placeholder="Request desain, finishing, dll..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 5px;">
+                    <i class="fab fa-whatsapp"></i> Pesan via WhatsApp
                 </button>
             </form>
         </div>

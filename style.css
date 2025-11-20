@@ -1066,3 +1066,102 @@ section {
 .sidebar-nav ul li a[target="_blank"]:hover {
     background-color: #3b5a9a; /* Warna hover sedikit beda */
 }
+
+/* --- UPDATE FINAL MODAL ORDER (TANPA SCROLL) --- */
+
+#orderModal .modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    max-width: 650px;
+    width: 95%; /* Sedikit lebih lebar agar lega */
+    
+    /* PENTING: Hapus max-height dan overflow agar tidak ada scroll */
+    /* max-height: 90vh;  <-- HAPUS INI */
+    /* overflow-y: auto;  <-- HAPUS INI */
+    
+    padding: 20px; /* Padding dikurangi biar hemat tempat */
+    margin: 0;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    background: white;
+}
+
+/* Header Modal (Judul) */
+.modal-header h2 {
+    margin-top: 0;
+    margin-bottom: 15px; /* Kurangi jarak bawah judul */
+    font-size: 1.5rem;
+}
+
+/* Layout Form Baris */
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px; /* Jarak antar baris diperkecil */
+}
+
+.form-row .form-group {
+    margin-bottom: 0;
+}
+
+/* Styling Input agar seragam & compact */
+.modal-content input[type="text"],
+.modal-content input[type="tel"],
+.modal-content input[type="number"],
+.modal-content select {
+    width: 100%;
+    height: 40px; /* Tinggi input dikurangi sedikit (dari 45 ke 40) */
+    padding: 0 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+/* Khusus Textarea */
+.modal-content textarea {
+    width: 100%;
+    margin-top: 4px;
+    border-radius: 6px;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    resize: none;
+    height: 60px; /* Tinggi textarea dibatasi */
+}
+
+/* Label */
+.modal-content label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 0;
+}
+
+/* Tombol Submit */
+#orderForm button[type="submit"] {
+    margin-top: 15px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 16px;
+    border-radius: 8px;
+}
+
+/* Responsif HP */
+@media (max-width: 600px) {
+    .form-row {
+        flex-wrap: wrap; /* Biarkan turun ke bawah kalau layar terlalu sempit */
+    }
+    #orderModal .modal-content {
+        width: 90%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
