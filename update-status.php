@@ -10,24 +10,43 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
         $orderId = intval($_POST['id']);
         $newStatus = $conn->real_escape_string($_POST['status']);
         
-        // Hanya status 'Selesai' yang valid untuk diubah dari halaman pesanan
-        if ($newStatus === 'Selesai') {
-            $sql = "UPDATE pesanan SET status = ? WHERE id = ? AND status = 'Tertunda'";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("si", $newStatus, $orderId);
+        // Status yang diizinkan untuk diubah
+        $allowedNewStatus = ['Proses', 'Selesai', 'Tertunda'];
 
-            if ($stmt->execute()) {
-                if ($stmt->affected_rows > 0) {
-                    $response['success'] = true;
-                    $response['message'] = 'Pesanan ditandai sebagai Selesai.';
-                } else {
-                    $response['message'] = 'Pesanan tidak ditemukan atau status sudah berubah.';
-                    $response['success'] = false; // Eksplisit
-                }
-            } else {
-                $response['message'] = 'Gagal memperbarui status: ' . $stmt->error;
+        if (in_array($newStatus, $allowedNewStatus)) {
+            $sql = "";
+            // Tentukan query UPDATE berdasarkan status baru yang diminta
+            if ($newStatus === 'Proses') {
+                // Hanya bisa dari Tertunda
+                $sql = "UPDATE pesanan SET status = ? WHERE id = ? AND status = 'Tertunda'";
+            } elseif ($newStatus === 'Selesai') {
+                // Bisa dari Tertunda atau Proses
+                $sql = "UPDATE pesanan SET status = ? WHERE id = ? AND status IN ('Tertunda', 'Proses')";
+            } elseif ($newStatus === 'Tertunda') {
+                // Hanya bisa dari Proses
+                $sql = "UPDATE pesanan SET status = ? WHERE id = ? AND status = 'Proses'";
             }
-            $stmt->close();
+            
+            if ($sql) {
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("si", $newStatus, $orderId);
+
+                if ($stmt->execute()) {
+                    if ($stmt->affected_rows > 0) {
+                        $response['success'] = true;
+                        $response['message'] = 'Status pesanan berhasil diperbarui menjadi ' . $newStatus . '.';
+                        $response['new_status'] = $newStatus;
+                    } else {
+                        $response['message'] = 'Perubahan status tidak diizinkan atau pesanan tidak ditemukan.';
+                        $response['success'] = false;
+                    }
+                } else {
+                    $response['message'] = 'Gagal memperbarui status: ' . $stmt->error;
+                }
+                $stmt->close();
+            } else {
+                $response['message'] = 'Alur status tidak valid.';
+            }
         } else {
             $response['message'] = 'Status tujuan tidak valid.';
         }
