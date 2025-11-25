@@ -1,17 +1,5 @@
 <?php
-// Memulai session di halaman ini
-session_start();
-
-// Tentukan atribut link untuk tombol Admin
-$admin_href = "#"; // Default: link # untuk memicu modal
-$admin_id = "id=\"loginBtn\""; // Default: ID untuk memicu JavaScript modal
-
-// Jika user terdeteksi sudah login (session 'loggedin' ada dan true)
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-    // Ubah link menjadi ke dashboard
-    $admin_href = "dashboard.php"; 
-    $admin_id = ""; 
-}
+require_once 'config.php';
 ?>
 
 <!DOCTYPE html>
@@ -25,6 +13,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 </head>
 <body>
     <header class="header">
@@ -41,7 +30,6 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                     <li><a href="#produk">Produk</a></li>
                     <li><a href="#cara-kerja">Cara Pesan</a></li>
                     <li><a href="#kontak">Kontak</a></li>
-                    <li><a href="<?php echo $admin_href; ?>" <?php echo $admin_id; ?> class="login-icon"><i class="fas fa-user-circle"></i></a></li>
                 </ul>
             </nav>
             <div class="hamburger" id="hamburger">
@@ -59,10 +47,24 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                 <p>Spanduk, banner, stiker, baliho, brosur, dan berbagai kebutuhan cetak lainnya dengan kualitas kerajaan dan harga terjangkau.</p>
                 <div class="hero-buttons">
                     <a href="#produk" class="btn-primary">Lihat Produk</a>
+                    <a href="#kontak" class="btn-primary">Kontak Kami</a>
                 </div>
             </div>
             <div class="hero-image">
-                <img src="assets/king2.jpg" alt="Contoh Produk Cetak King Advertising">
+                <div class="swiper myHeroSlider">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <img src="assets/heroslide1.jpg" alt="Slide 1">
+                        </div>
+                        <div class="swiper-slide">
+                            <img src="assets/heroslide2.jpg" alt="Slide 2">
+                        </div>
+                        <div class="swiper-slide">
+                            <img src="assets/heroslide3.jpg" alt="Slide 3">
+                        </div>
+                    </div>
+                    <div class="swiper-pagination"></div>
+                </div>
             </div>
         </div>
     </section>
@@ -76,35 +78,35 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                 <h3>Spanduk & Banner</h3>
                 <p>Cetak spanduk dan banner dengan berbagai ukuran dan bahan berkualitas untuk kebutuhan promosi Anda.</p>
                 <button class="btn-order" data-produk="Spanduk & Banner">Pesan Sekarang</button>
-                <a href="produk.php?produk=Spanduk & Banner" class="btn-view-design">Lihat Desain</a>
+                <a href="produk.php?produk=Spanduk %26 Banner" class="btn-view-design">Lihat Desain</a>
             </div>
             <div class="produk-item">
                 <div class="produk-icon"><i class="fas fa-sticky-note"></i></div>
                 <h3>Stiker & Label</h3>
                 <p>Stiker berkualitas untuk produk, kemasan, atau promosi dengan berbagai pilihan bahan ternama dan finishing.</p>
                 <button class="btn-order" data-produk="Stiker & Label">Pesan Sekarang</button>
-                <a href="produk.php?produk=Stiker & Label" class="btn-view-design">Lihat Desain</a>
+                <a href="produk.php?produk=Stiker %26 Label" class="btn-view-design">Lihat Desain</a>
             </div>
             <div class="produk-item">
                 <div class="produk-icon"><i class="fas fa-bullhorn"></i></div>
                 <h3>Baliho & Billboard</h3>
                 <p>Solusi cetak baliho ukuran besar untuk iklan luar ruangan dengan ketajaman gambar maksimal dan bahan berkualitas.</p>
                 <button class="btn-order" data-produk="Baliho & Billboard">Pesan Sekarang</button>
-                <a href="produk.php?produk=Baliho & Billboard" class="btn-view-design">Lihat Desain</a>
+                <a href="produk.php?produk=Baliho %26 Billboard" class="btn-view-design">Lihat Desain</a>
             </div>
             <div class="produk-item">
                 <div class="produk-icon"><i class="fas fa-newspaper"></i></div>
                 <h3>Brosur & Flyer</h3>
                 <p>Brosur dan flyer dengan desain menarik untuk promosi bisnis, acara, atau produk Anda.</p>
                 <button class="btn-order" data-produk="Brosur & Flyer">Pesan Sekarang</button>
-                <a href="produk.php?produk=Brosur & Flyer" class="btn-view-design">Lihat Desain</a>
+                <a href="produk.php?produk=Brosur %26 Flyer" class="btn-view-design">Lihat Desain</a>
             </div>
             <div class="produk-item">
                 <div class="produk-icon"><i class="fas fa-box"></i></div>
                 <h3>Kemasan & Dus</h3>
                 <p>Kemasan produk dan dus custom dengan desain menarik untuk meningkatkan nilai produk Anda.</p>
                 <button class="btn-order" data-produk="Kemasan & Dus">Pesan Sekarang</button>
-                <a href="produk.php?produk=Kemasan & Dus" class="btn-view-design">Lihat Desain</a>
+                <a href="produk.php?produk=Kemasan %26 Dus" class="btn-view-design">Lihat Desain</a>
             </div>
             <div class="produk-item">
                 <div class="produk-icon"><i class="fas fa-palette"></i></div>
@@ -137,13 +139,13 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                     <div class="step-number">3</div>
                     <div class="step-icon"><i class="fab fa-whatsapp"></i></div>
                     <h3>Kirim ke WhatsApp</h3>
-                    <p>Klik tombol kirim dan data pesanan Anda akan kami terima di sistem dan juga terbuka di WhatsApp.</p>
+                    <p>Klik tombol kirim dan data pesanan Anda akan kami terima di sistem dan juga WhatsApp.</p>
                 </div>
                 <div class="step">
                     <div class="step-number">4</div>
                     <div class="step-icon"><i class="fas fa-shipping-fast"></i></div>
                     <h3>Produk Siap</h3>
-                    <p>Produk selesai dibuat, Anda akan kami hubungi untuk proses pengambilan atau pengiriman.</p>
+                    <p>Produk selesai dibuat, Anda dihubungi untuk proses pengambilan atau pengiriman.</p>
                 </div>
             </div>
         </div>
@@ -215,7 +217,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                     <textarea id="catatan" name="catatan" rows="2" placeholder="Request desain, finishing, dll..."></textarea>
                 </div>
 
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 5px;">
+                <button type="submit" class="btn-pesanwa" style="width: 100%; margin-top: 5px;">
                     <i class="fab fa-whatsapp"></i> Pesan via WhatsApp
                 </button>
             </form>
@@ -257,6 +259,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     </footer>
 
     <a href="https://wa.me/6288705844251?text=Halo%20kak%2C%20saya%20ingin%20melakukan%20pemesanan" class="whatsapp-sticky" target="_blank" data-tooltip="Pesan via WhatsApp"><i class="fab fa-whatsapp"></i></a>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -1,85 +1,17 @@
 <?php
-session_start();
-$admin_href = "#"; // Default: link # untuk memicu modal
-$admin_id = "id=\"loginBtn\""; // Default: ID untuk memicu JavaScript modal
-
-// Jika user terdeteksi sudah login
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-    $admin_href = "dashboard.php"; 
-    $admin_id = ""; 
-}
 require_once 'config.php';
 
-$is_admin = isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true;
 $produk = trim(urldecode($_GET['produk'] ?? ''));
+
 if (empty($produk)) {
     header("Location: index.php");
     exit;
 }
 
-$message = '';
-
-// === TAMBAH DESAIN ===
-if ($is_admin && isset($_POST['action']) && $_POST['action'] === 'tambah') {
-    $caption = trim($_POST['caption'] ?? '');
-    $uploadDir = 'assets/desain/';
-    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-    
-    if (!empty($_FILES['gambar']['name'])) {
-        $fileName = time() . '_' . basename($_FILES['gambar']['name']);
-        $targetFile = $uploadDir . $fileName;
-
-        if (move_uploaded_file($_FILES['gambar']['tmp_name'], $targetFile)) {
-            $stmt = $conn->prepare("INSERT INTO desain_produk (produk, gambar, caption) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $produk, $targetFile, $caption);
-            $stmt->execute();
-            $stmt->close();
-            $message = "<div class='success-msg'>Desain berhasil ditambahkan!</div>";
-        } else {
-            $message = "<div class='error-msg'>Gagal upload gambar.</div>";
-        }
-    }
-}
-
-// === EDIT CAPTION ===
-if ($is_admin && isset($_POST['action']) && $_POST['action'] === 'edit' && isset($_POST['id'])) {
-    $id = (int)$_POST['id'];
-    $caption = trim($_POST['caption'] ?? '');
-    $stmt = $conn->prepare("UPDATE desain_produk SET caption = ? WHERE id = ? AND produk = ?");
-    $stmt->bind_param("sis", $caption, $id, $produk);
-    $stmt->execute();
-    $stmt->close();
-    $message = "<div class='success-msg'>Caption diperbarui!</div>";
-}
-
-// === HAPUS DESAIN ===
-if ($is_admin && isset($_GET['hapus']) && is_numeric($_GET['hapus'])) {
-    $id = (int)$_GET['hapus'];
-    $stmt = $conn->prepare("SELECT gambar FROM desain_produk WHERE id = ? AND produk = ?");
-    $stmt->bind_param("is", $id, $produk);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) @unlink($row['gambar']);
-    $stmt->close();
-
-    $stmt = $conn->prepare("DELETE FROM desain_produk WHERE id = ? AND produk = ?");
-    $stmt->bind_param("is", $id, $produk);
-    $stmt->execute();
-    $stmt->close();
-    header("Location: produk.php?produk=" . urlencode($produk));
-    exit;
-}
-
-// === AMBIL DESAIN DARI DATABASE ===
 $stmt = $conn->prepare("SELECT id, gambar, caption FROM desain_produk WHERE produk = ? ORDER BY id DESC");
 $stmt->bind_param("s", $produk);
 $stmt->execute();
-$result = $stmt->get_result();
-$desains = $result->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
-
-$produk_clean = strtolower($produk);
-$has_desain = count($desains) > 0;
+$desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -87,103 +19,163 @@ $has_desain = count($desains) > 0;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($produk); ?> - King Printing</title>
+    <title>Katalog <?php echo htmlspecialchars($produk); ?></title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS KHUSUS HALAMAN INI */
+        
+        /* Grid System */
+        .desain-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 40px;
+            margin-top: 2rem;
+            padding-bottom: 50px; 
+        }
+
+        /* 1. KARTU UTAMA */
+        .desain-item {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            position: relative; 
+            overflow: visible !important;
+            transition: transform 0.2s; 
+        }
+
+        .desain-item:hover {
+            z-index: 9999; 
+        }
+
+        /* 2. PEMBUNGKUS THUMBNAIL (Update Disini) */
+        .img-wrapper {
+            width: 100%;
+            /* Saya kurangi tingginya biar gap atas-bawah berkurang */
+            height: 180px; 
+            overflow: hidden;
+            border-radius: 12px 12px 0 0;
+            
+            /* Background saya ubah jadi PUTIH biar gap-nya menyatu sama kartu */
+            background: white; 
+            
+            /* Posisi tengah */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px; /* Padding saya kurangi juga */
+            box-sizing: border-box;
+            border-bottom: 1px solid #f9f9f9; /* Garis tipis pemisah */
+        }
+
+        /* GAMBAR THUMBNAIL */
+        .thumb-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Tetap utuh */
+            display: block;
+        }
+
+        /* 3. GAMBAR POP-UP */
+        .popup-img-container {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+
+            position: absolute;
+            top: -40px;       /* Muncul lebih atas lagi */
+            left: 50%;
+            transform: translateX(-50%) scale(0.8);
+            
+            width: 160%;      
+            min-width: 280px;
+            
+            background: white;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+            z-index: 10000;
+            
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .popup-img-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+        }
+
+        /* AKSI HOVER */
+        .desain-item:hover .popup-img-container {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* Caption */
+        .desain-caption {
+            padding: 15px;
+            text-align: center; font-weight: 600; color: #444; font-size: 0.95rem;
+        }
+
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #555; font-weight: 600; margin-bottom: 25px; }
+        .btn-back:hover { color: var(--brand-red, #dc3545); }
+    </style>
 </head>
 <body>
-<header class="header">
-    <div class="container">
-        <div class="logo">
-            <img src="assets/crown-logo2.png" alt="King Printing Logo" class="logo-image">
-            <div class="logo-text"><span>King Printing</span></div>
-        </div>
-        <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
-    </div>
-</header>
 
-<section class="produk-detail" style="padding: 10rem 0 5rem; background: #f9f9f9;">
-    <div class="container">
-        <h2 class="section-title">Desain <span class="highlight"><?php echo htmlspecialchars($produk); ?></span></h2>
-
-        <!-- Admin: Tambah Desain -->
-       <div class="header-tambah-desain">
-            <p>Contoh desain untuk inspirasi. Anda juga bisa kirim desain sendiri!</p>
-            
-            <?php if ($is_admin): ?>
-                <button id="bukaModalBtn" class="tombol-tambah-desain">+ Tambah Desain</button>
-            <?php endif; ?>
-        </div>
-
-        <?php echo $message; ?>
-
-        <?php if ($is_admin): ?>
-            <div id="tambahDesainModal" class="modal">
-                <div class="modal-content">
-                    <span class="close-modal-btn">&times;</span>
-                    <h3>Tambah Desain Baru</h3>
-                    
-                    <form method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="action" value="tambah">
-                        
-                        <label for="judul_desain">Judul Desain (opsional)</label>
-                        <input type="text" id="judul_desain" name="caption" placeholder="Contoh: Spanduk Warung Kopi">
-                        
-                        <label for="file_desain">Upload Gambar</label>
-                        <input type="file" id="file_desain" name="gambar" accept="image/*" required>
-                        
-                        <button type="submit" class="tombol-submit-modal">Upload</button>
-                    </form>
-                </div>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <img src="assets/crown-logo2.png" alt="Logo" class="logo-image">
+                <div class="logo-text"><span>King Printing</span></div>
             </div>
-            <?php endif; ?>
+            <nav class="nav">
+                <ul>
+                    <li><a href="index.php">Kembali ke Beranda</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-        <!-- SEMUA PRODUK SEKARANG GRID -->
-        <?php if ($has_desain): ?>
-            <div class="banner-section" style="margin-top:3rem;">
-                <h3 style="text-align:center; color:#333;">Contoh Desain <?php echo htmlspecialchars($produk); ?></h3>
-                <div class="desain-gallery" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:1.5rem; margin-top:2rem;">
+    <section style="padding: 8rem 0 5rem; background: #fcfcfc; min-height: 100vh;">
+        <div class="container">
+            <h2 class="section-title">Katalog <span class="highlight"><?php echo htmlspecialchars($produk); ?></span></h2>
+            
+            <?php if (count($desains) > 0): ?>
+                <div class="desain-gallery">
                     <?php foreach ($desains as $d): ?>
-                        <div class="desain-item" style="background:white; border-radius:10px; overflow:hidden; box-shadow:0 4px 8px rgba(0,0,0,0.1); position:relative;">
-                            <img src="<?= htmlspecialchars($d['gambar']) ?>" alt="<?= htmlspecialchars($d['caption']) ?>" style="width:100%; height:200px; object-fit:cover;">
-                            <div class="desain-caption" style="padding:0.8rem; text-align:center; font-weight:500;">
-                                <?= htmlspecialchars($d['caption'] ?: 'Desain Produk') ?>
+                        <div class="desain-item">
+                            
+                            <div class="img-wrapper">
+                                <img src="<?= htmlspecialchars($d['gambar']) ?>" class="thumb-img" alt="Thumbnail">
                             </div>
 
-                            <?php if ($is_admin): ?>
-                                <div class="action-icons" style="position:absolute; top:10px; right:10px; background:rgba(255,255,255,0.9); border-radius:8px; padding:0.3rem 0.5rem;">
-                                    <a href="javascript:void(0)" onclick="toggleEdit(<?= $d['id'] ?>)" style="color:#f39c12; margin:0 0.3rem;">Edit</a>
-                                    <a href="?produk=<?= urlencode($produk) ?>&hapus=<?= $d['id'] ?>" onclick="return confirm('Hapus desain ini?')" style="color:#e74c3c; margin:0 0.3rem;">Hapus</a>
-                                </div>
+                            <div class="popup-img-container">
+                                <img src="<?= htmlspecialchars($d['gambar']) ?>" alt="Full View">
+                            </div>
 
-                                <div id="edit-<?= $d['id'] ?>" class="edit-form" style="display:none; margin:1rem; background:#f9f9f9; padding:0.8rem; border-radius:8px;">
-                                    <form method="POST" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                                        <input type="hidden" name="action" value="edit">
-                                        <input type="hidden" name="id" value="<?= $d['id'] ?>">
-                                        <input type="text" name="caption" value="<?= htmlspecialchars($d['caption']) ?>" placeholder="Edit caption" style="flex:1; padding:0.5rem; border-radius:8px; border:1px solid #ccc;">
-                                        <button type="submit" style="background:#f39c12; color:white; border:none; padding:0.5rem 1rem; border-radius:8px;">Simpan</button>
-                                        <button type="button" onclick="toggleEdit(<?= $d['id'] ?>)" style="background:#95a5a6; color:white; border:none; padding:0.5rem 1rem; border-radius:8px;">Batal</button>
-                                    </form>
-                                </div>
-                            <?php endif; ?>
+                            <div class="desain-caption">
+                                <?= htmlspecialchars($d['caption'] ?: 'Desain Terbaru') ?>
+                            </div>
+
                         </div>
                     <?php endforeach; ?>
                 </div>
-            </div>
-        <?php else: ?>
-            <p class="no-design">Belum ada contoh desain untuk produk ini.</p>
-        <?php endif; ?>
-    </div>
-</section>
+            <?php else: ?>
+                <div style="text-align:center; padding:50px; color:#aaa;">
+                    <i class="fas fa-images" style="font-size:3rem; margin-bottom:10px;"></i>
+                    <p>Belum ada foto.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </section>
+    
+    <footer class="footer" style="padding:20px 0; text-align:center; font-size:0.9rem;">
+        <p>&copy; 2025 King Printing.</p>
+    </footer>
 
-    <script src="script.js"></script>
-
-<script>
-function toggleEdit(id) {
-    const el = document.getElementById('edit-' + id);
-    el.style.display = el.style.display === 'block' ? 'none' : 'block';
-}
-</script>
 </body>
 </html>

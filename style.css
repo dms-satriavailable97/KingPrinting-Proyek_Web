@@ -65,6 +65,7 @@ body {
     line-height: 1; 
     padding: 0;
     margin: 0;
+    font-weight: 3000;
     display: inline-block; 
 }
 
@@ -211,7 +212,27 @@ body {
     box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4);
 }
 
+.btn-pesanwa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(32, 209, 1);
+    color: white;
+    padding: 0.9rem 1.8rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgb(134, 240, 63);
+}
+
 .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(211, 47, 47, 0.6);
+}
+.btn-pesanwa:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(211, 47, 47, 0.6);
 }
@@ -226,8 +247,12 @@ body {
     transition: all 0.3s;
     border: none;
     cursor: pointer;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     width: 100%;
+    text-align: center;
+    font-size: 1rem; 
+    line-height: 1.5;
+
 }
 
 .btn-order:hover {
@@ -1164,4 +1189,254 @@ section {
         top: 50%;
         transform: translate(-50%, -50%);
     }
+}
+
+/* --- TAMBAHAN UNTUK HERO SLIDER --- */
+
+/* Mengatur container slider agar ukurannya pas di layout Hero */
+.hero-image .myHeroSlider {
+    width: 100%;
+    max-width: 100%;
+    /* Memindahkan gaya border/shadow yang dulu ada di <img> ke slider wrapper */
+    border-radius: 10px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    border: 5px solid var(--dark-red);
+    overflow: hidden; /* Agar gambar tidak keluar dari border radius */
+    background: #fff;
+}
+
+/* Mengatur gambar di dalam slide */
+.hero-image .swiper-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Agar gambar pas memenuhi kotak */
+    display: block;
+    
+    /* Reset gaya lama agar tidak dobel border */
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+}
+
+/* Warna titik navigasi slider agar sesuai tema merah */
+.hero-image .swiper-pagination-bullet-active {
+    background: var(--dark-red);
+}
+
+/* --- PERBAIKAN LAYOUT HERO --- */
+
+/* 1. Pastikan Container Hero menggunakan Flexbox yang rapi */
+.hero .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem; /* Jarak antar teks dan gambar */
+    position: relative;
+    z-index: 1;
+}
+
+/* 2. Kunci Lebar Bagian Gambar (PENTING AGAR TIDAK MELAR) */
+.hero-image {
+    flex: 1;
+    width: 50%; /* Mengambil separuh layar */
+    max-width: 500px; /* Batas maksimal agar tidak terlalu raksasa */
+    min-width: 300px; /* Batas minimal */
+    position: relative;
+    overflow: hidden; /* Mencegah isi slider keluar jalur */
+}
+
+/* 3. Style Container Slider */
+.myHeroSlider {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    border: 5px solid var(--dark-red);
+    background-color: #fff; /* Warna latar jika gambar loading */
+}
+
+/* 4. Style Gambar di Dalam Slider */
+.myHeroSlider .swiper-slide img {
+    width: 100%;
+    height: 300px; /* Tentukan tinggi tetap agar seragam */
+    object-fit: cover; /* Gambar dipotong rapi memenuhi kotak */
+    display: block;
+}
+
+/* Responsif untuk HP (Layar Kecil) */
+@media (max-width: 768px) {
+    .hero .container {
+        flex-direction: column-reverse; /* Gambar di atas, teks di bawah (opsional) atau column biasa */
+        text-align: center;
+    }
+
+    .hero-image {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .hero-content {
+        padding-right: 0;
+    }
+}
+
+/* --- PERBAIKAN FINAL HERO SECTION & SLIDER --- */
+
+/* 1. Membuat Section Hero Memenuhi Layar (Full Height) */
+.hero {
+    /* Menambah padding atas/bawah agar lega */
+    padding: 7rem 0 5rem;; 
+    
+    /* KUNCI: Paksa tinggi minimal 90% dari layar gadget */
+    min-height: 90vh; 
+    
+    /* Pastikan konten di dalamnya rata tengah secara vertikal */
+    display: flex;
+    align-items: center; 
+}
+
+/* 2. Mengatur Container (Agar teks dan gambar seimbang) */
+.hero .container {
+    display: flex;
+    align-items: center; /* Teks dan Gambar sejajar tengah vertikal */
+    justify-content: space-between;
+    gap: 3rem; /* Jarak antar teks dan gambar diperlebar */
+    width: 100%; /* Pastikan container full width */
+}
+
+/* 3. Memperbesar Area Gambar (Wadah Slider) */
+.hero-image {
+    flex: 1.2; /* Memberi porsi lebih besar dibanding teks (sebelumnya 1) */
+    width: 55%; /* Persentase lebar layar */
+    
+    /* UBAH DI SINI: Memperbesar batas maksimal gambar */
+    max-width: 700px; /* Tadi 500px, sekarang 700px biar JUMBO */
+    min-width: 350px;
+    
+    position: relative;
+    z-index: 2;
+}
+
+/* 4. Memperbesar Tinggi Gambar Slider */
+.myHeroSlider .swiper-slide img {
+    width: 100%;
+    
+    /* UBAH DI SINI: Mengatur tinggi gambar */
+    height: 450px; /* Tadi 300px, sekarang 450px biar tinggi */
+    
+    object-fit: cover;
+    display: block;
+}
+
+/* --- RESPONSIF (Tampilan HP) --- */
+@media (max-width: 992px) {
+    /* Tablet & HP Layar Besar */
+    .hero .container {
+        flex-direction: column-reverse; /* Gambar di atas, Teks di bawah */
+        text-align: center;
+        gap: 2rem;
+    }
+
+    .hero {
+        padding: 8rem 0 4rem; /* Kurangi padding di HP */
+        min-height: auto; /* Di HP tidak perlu full height kaku */
+    }
+
+    .hero-image {
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .hero-content {
+        padding-right: 0;
+        width: 100%;
+    }
+    
+    /* Di HP gambarnya jangan terlalu tinggi biar ga menuhin layar */
+    .myHeroSlider .swiper-slide img {
+        height: 300px; 
+    }
+}
+
+/* --- PERBAIKAN TAMPILAN MODAL ORDER --- */
+
+/* 1. Perbaikan Layout: Agar Nama & WA Full Kanan-Kiri */
+.form-row {
+    display: flex;
+    gap: 15px;      /* Jarak antar kolom */
+    width: 100%;    /* Pastikan baris mengambil lebar penuh */
+}
+
+.form-row .form-group {
+    flex: 1;        /* KUNCI: Memaksa kolom membagi rata ruang yang ada (50:50) */
+    width: 100%;    /* Memastikan input di dalamnya ikut melebar */
+    min-width: 0;   /* Mencegah layout pecah di layar kecil */
+}
+
+/* 2. Perbaikan Estetika: Menyamakan Lengkungan & Garis Semua Kolom */
+/* --- PERBAIKAN FINAL (TARGET ID LANGSUNG) --- */
+
+/* Kita targetkan semua elemen input di dalam modal tanpa terkecuali */
+#orderModal .modal-content input,
+#orderModal .modal-content select,
+#orderModal .modal-content textarea {
+    /* 1. RESET GAYA BAWAAN BROWSER (WAJIB) */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    /* 2. SAMAKAN BENTUK KOTAK */
+    border-radius: 10px !important;       /* Sudut melengkung */
+    border: 1px solid #ccc !important;    /* Garis pinggir abu-abu */
+    background-color: #fff !important;    /* Warna dasar putih */
+    box-shadow: none !important;          /* Hapus bayangan aneh bawaan */
+    
+    /* 3. SAMAKAN UKURAN */
+    width: 100%;
+    height: 45px !important;              /* Paksa tinggi sama rata */
+    padding: 0 15px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    box-sizing: border-box;
+    outline: none;
+    margin-top: 5px; /* Jarak sedikit dari label */
+}
+
+/* Khusus Textarea (Catatan) tingginya beda sendiri */
+#orderModal .modal-content textarea {
+    height: 100px !important;
+    padding-top: 12px;
+    line-height: 1.5;
+    resize: none;
+}
+
+/* Khusus Select (Pilih Bahan) perlu panah manual karena 'appearance:none' menghapusnya */
+#orderModal .modal-content select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+/* Efek saat diklik (Fokus) - Biar menyala merah */
+#orderModal .modal-content input:focus,
+#orderModal .modal-content select:focus,
+#orderModal .modal-content textarea:focus {
+    border-color: var(--brand-red) !important;
+    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1) !important;
+}
+
+/* Perbaikan Layout Kanan-Kiri (Agar Nama & WA pas) */
+.form-row {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+}
+.form-row .form-group {
+    flex: 1;
+    width: 100%;
 }

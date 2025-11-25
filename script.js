@@ -191,3 +191,23 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 });
+
+// --- INISIALISASI HERO SLIDER ---
+document.addEventListener("DOMContentLoaded", function() {
+    // Cek apakah elemen slider ada (agar tidak error di halaman lain)
+    if (document.querySelector('.myHeroSlider')) {
+        var heroSwiper = new Swiper(".myHeroSlider", {
+            loop: true,                 // Muter terus
+            effect: "slide",            // Efek geser
+            speed: 800,                 // Kecepatan transisi (ms)
+            autoplay: {
+                delay: 3000,            // Ganti gambar tiap 3 detik
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+        });
+    }
+});

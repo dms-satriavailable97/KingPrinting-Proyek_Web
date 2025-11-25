@@ -69,8 +69,7 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                     <li><a href="dashboard.php" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                     <li><a href="pesanan.php"><i class="fas fa-inbox"></i> Pesanan</a></li>
                     <li><a href="riwayat-pesanan.php"><i class="fas fa-history"></i> Riwayat Pesanan</a></li>
-                    <li><a href="#" id="bukaProdukModalBtn"><i class="fas fa-palette"></i> Lihat Produk</a></li>
-                    <li><a href="index.php"> <i class="fas fa-home"></i> Kembali</a></li>
+                    <li><a href="kelola-produk.php"><i class="fas fa-box-open"></i> Kelola Produk</a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer"><a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
