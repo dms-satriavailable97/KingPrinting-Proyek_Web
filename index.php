@@ -29,6 +29,7 @@ require_once 'config.php';
                     <li><a href="#home">Beranda</a></li>
                     <li><a href="#produk">Produk</a></li>
                     <li><a href="#cara-kerja">Cara Pesan</a></li>
+                    <li><a href="#faq">FAQ</a></li>
                     <li><a href="#kontak">Kontak</a></li>
                 </ul>
             </nav>
@@ -174,6 +175,89 @@ require_once 'config.php';
             </div>
         </div>
     </section>
+
+    <!-- MULAI SECTION FAQ (LAYOUT BARU: 2 KOLOM) -->
+    <section class="faq-section" id="faq">
+        <div class="container">
+            <div class="faq-wrapper">
+                
+                <!-- KOLOM KIRI: Judul & CTA Bantuan -->
+                <div class="faq-sidebar">
+                    <div class="faq-header-block">
+                        <span class="sub-title">Tanya Jawab</span>
+                        <h2 class="section-title-left">Pertanyaan <span class="highlight">Umum</span></h2>
+                        <p class="faq-desc">Berikut adalah beberapa hal yang sering ditanyakan oleh pelanggan kami. Klik pada pertanyaan untuk melihat jawabannya.</p>
+                    </div>
+                    
+                    <!-- Kotak Bantuan Tambahan -->
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fab fa-whatsapp"></i></div>
+                        <div class="help-text">
+                            <h4>Masih Bingung?</h4>
+                            <p>Jangan ragu untuk konsultasi langsung dengan admin kami.</p>
+                            <a href="https://wa.me/6288705844251?text=Halo%2C%20saya%20mau%20tanya%20tentang%20percetakan" target="_blank" class="btn-help">Chat Admin Sekarang <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KOLOM KANAN: List Accordion FAQ -->
+                <div class="faq-list">
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Berapa lama proses pengerjaan pesanan?</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Waktu pengerjaan tergantung jenis produk dan jumlah pesanan. Untuk spanduk/banner standar biasanya selesai dalam 1-2 hari kerja. Untuk pesanan custom atau jumlah besar, estimasi waktu akan diinfokan di awal.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Apakah bisa bantu buatkan desainnya?</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Tentu saja! Kami memiliki tim desainer profesional yang siap membantu. Silakan lampirkan detail, teks, atau sketsa kasar ide Anda pada kolom catatan saat memesan.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Apakah ada minimal order?</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Sebagian besar produk (spanduk, banner) bisa dipesan satuan. Namun untuk produk kecil seperti stiker label atau kemasan dus, mungkin ada minimum order untuk efisiensi harga.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Bagaimana sistem pembayarannya?</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Pembayaran dilakukan melalui transfer bank atau e-wallet (DANA/OVO/GoPay). Detail rekening akan dikirimkan otomatis ke WhatsApp Anda setelah mengisi form pemesanan.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Apakah melayani pengiriman luar kota?</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Ya, kami melayani pengiriman ke seluruh Indonesia menggunakan ekspedisi terpercaya (JNE, J&T, Cargo). Ongkir dihitung berdasarkan berat dan lokasi tujuan.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- AKHIR SECTION FAQ -->
 
     <div class="modal" id="orderModal">
         <div class="modal-content">

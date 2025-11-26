@@ -30,9 +30,10 @@ if(closeOrderBtn) {
 
 // Modal Login functionality
 const loginModal = document.getElementById('loginModal');
-const loginBtn = document.getElementById('loginBtn');
+const loginBtn = document.getElementById('loginBtn'); 
 const closeLoginBtn = document.querySelector('.close-login');
 
+// (Opsional) Jika Anda punya tombol login di index.php
 if(loginBtn) {
     loginBtn.addEventListener('click', function(e) {
         e.preventDefault();
@@ -116,7 +117,7 @@ if(orderForm) {
         
         // --- Bagian 3: Membersihkan form dan menutup modal ---
         orderForm.reset();
-        modal.style.display = 'none';
+        orderModal.style.display = 'none';
         document.body.style.overflow = 'auto';
         
         alert('Terima kasih! Pesanan Anda sedang kami proses. Silakan lanjutkan konfirmasi di WhatsApp.');
@@ -156,52 +157,15 @@ function animateOnScroll() {
 document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('scroll', animateOnScroll);
     animateOnScroll();
-});
 
-// --- Logika Modal Tambah Desain ---
-
-// Cek saat halaman selesai dimuat
-document.addEventListener("DOMContentLoaded", function() {
-
-    // Dapatkan elemen-elemen modal
-    var modal = document.getElementById("tambahDesainModal");
-    var btn = document.getElementById("bukaModalBtn");
-    var span = document.getElementsByClassName("close-modal-btn")[0];
-
-    // Cek apakah elemen-elemen tersebut ada di halaman ini
-    // Ini agar script tidak error di halaman lain yang tidak punya tombol/modal
-    // (Penting karena tombol & modal ini hanya ada untuk admin)
-    if (modal && btn && span) {
-        
-        // Saat tombol "+ Tambah Desain" diklik, tampilkan modal
-        btn.onclick = function() {
-            modal.style.display = "block";
-        }
-
-        // Saat tombol 'x' (span) diklik, tutup modal
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-
-        // Saat pengguna mengklik di luar area modal (di latar belakang gelap), tutup juga modalnya
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-    }
-});
-
-// --- INISIALISASI HERO SLIDER ---
-document.addEventListener("DOMContentLoaded", function() {
-    // Cek apakah elemen slider ada (agar tidak error di halaman lain)
+    // --- INISIALISASI HERO SLIDER ---
     if (document.querySelector('.myHeroSlider')) {
         var heroSwiper = new Swiper(".myHeroSlider", {
-            loop: true,                 // Muter terus
-            effect: "slide",            // Efek geser
-            speed: 800,                 // Kecepatan transisi (ms)
+            loop: true,                 
+            effect: "slide",            
+            speed: 800,                 
             autoplay: {
-                delay: 3000,            // Ganti gambar tiap 3 detik
+                delay: 3000,            
                 disableOnInteraction: false,
             },
             pagination: {
@@ -210,4 +174,32 @@ document.addEventListener("DOMContentLoaded", function() {
             },
         });
     }
+
+    // --- FAQ Accordion Functionality ---
+    const faqItems = document.querySelectorAll('.faq-item');
+
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+
+        question.addEventListener('click', () => {
+            // 1. Tutup item lain yang sedang terbuka
+            faqItems.forEach(otherItem => {
+                if (otherItem !== item && otherItem.classList.contains('active')) {
+                    otherItem.classList.remove('active');
+                    otherItem.querySelector('.faq-answer').style.maxHeight = null;
+                }
+            });
+
+            // 2. Toggle item yang diklik
+            item.classList.toggle('active');
+
+            // 3. Atur max-height untuk animasi smooth
+            if (item.classList.contains('active')) {
+                answer.style.maxHeight = answer.scrollHeight + "px";
+            } else {
+                answer.style.maxHeight = null;
+            }
+        });
+    });
 });
