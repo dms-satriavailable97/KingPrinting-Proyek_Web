@@ -82,7 +82,8 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                 <div class="header-right">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Cari Pesanan...">
+                        <!-- Input Search dengan ID searchInput -->
+                        <input type="text" id="searchInput" placeholder="Cari Pesanan...">
                     </div>
                 </div>
             </header>
@@ -168,6 +169,37 @@ document.addEventListener("DOMContentLoaded", function() {
     const detailModal = document.getElementById('detailModal');
     const closeDetailModal = document.querySelector('.close-detail-modal');
     let activeDropdown = null;
+
+    // === LOGIKA PENCARIAN REAL-TIME ===
+    const searchInput = document.getElementById('searchInput');
+    // Pastikan kita mengambil baris dari tbody saja, bukan header
+    const tableRows = document.querySelectorAll('#ordersTable tbody tr');
+
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+
+            tableRows.forEach(row => {
+                // Cek apakah baris ini adalah baris pesan "Tidak ada pesanan"
+                if (row.cells.length === 1 && row.cells[0].getAttribute('colspan')) {
+                    return; 
+                }
+
+                // Ambil data dari kolom ID (index 0), Nama (index 1), dan Produk (index 2)
+                const textId = row.cells[0] ? row.cells[0].textContent.toLowerCase() : '';
+                const textNama = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
+                const textProduk = row.cells[2] ? row.cells[2].textContent.toLowerCase() : '';
+
+                // Cek apakah ada yang cocok
+                if (textId.includes(searchTerm) || textNama.includes(searchTerm) || textProduk.includes(searchTerm)) {
+                    row.style.display = ""; // Tampilkan kembali
+                } else {
+                    row.style.display = "none"; // Sembunyikan
+                }
+            });
+        });
+    }
+    // ==================================
 
     // --- FUNGSI UNTUK MENGUBAH STATUS PESANAN ---
     function updateOrderStatus(orderId, newStatus) {

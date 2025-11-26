@@ -75,7 +75,13 @@ require_once 'config.php';
         <main class="main-content">
             <header class="main-header">
                 <div class="header-left"><h3>Pesanan Aktif</h3></div>
-                <div class="header-right"><div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="Cari Pesanan..."></div></div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <!-- ID ditambahkan -->
+                        <input type="text" id="searchInput" placeholder="Cari Pesanan...">
+                    </div>
+                </div>
             </header>
             
             <section class="customers-table">
@@ -178,6 +184,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
     let activeDropdown = null;
     let orderIdToDelete = null;
+
+    // === LOGIKA PENCARIAN REAL-TIME ===
+    const searchInput = document.getElementById('searchInput');
+    const tableRows = document.querySelectorAll('#ordersTable tbody tr');
+
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+
+            tableRows.forEach(row => {
+                // Abaikan baris "Tidak ada pesanan"
+                if (row.cells.length === 1 && row.cells[0].getAttribute('colspan')) return;
+
+                const textId = row.cells[0] ? row.cells[0].textContent.toLowerCase() : '';
+                const textNama = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
+                const textProduk = row.cells[2] ? row.cells[2].textContent.toLowerCase() : '';
+
+                if (textId.includes(searchTerm) || textNama.includes(searchTerm) || textProduk.includes(searchTerm)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+    }
+    // ==================================
 
     // --- FUNGSI UNTUK MENGUBAH STATUS ---
     function updateOrderStatus(orderId, newStatus, statusElement) {

@@ -87,10 +87,17 @@ body {
     text-align: center;
 }
 
-.sidebar-nav li a.active,
-.sidebar-nav li a:hover {
+/* Style Active tetap merah solid */
+.sidebar-nav li a.active {
     background-color: var(--brand-dark-red);
     color: white;
+    transform: translateX(5px);
+}
+
+/* Style Hover menu lain (selain active) mengikuti style logout (merah transparan) */
+.sidebar-nav li a:hover:not(.active) {
+    background-color: var(--status-inactive-bg);
+    color: var(--status-inactive-text);
     transform: translateX(5px);
 }
 

@@ -237,11 +237,11 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 <ul>
                     <li><a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                     <li><a href="pesanan.php"><i class="fas fa-inbox"></i> Pesanan</a></li>
-                    <li><a href="riwayat-pesanan.php"><i class="fas fa-history"></i> Riwayat</a></li>
+                    <li><a href="riwayat-pesanan.php"><i class="fas fa-history"></i> Riwayat Pesanan</a></li>
                     <li><a href="kelola-produk.php" class="active"><i class="fas fa-box-open"></i> Kelola Produk</a></li>
-                    <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 </ul>
             </nav>
+            <div class="sidebar-footer"><a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
         </aside>
 
         <main class="main-content">
