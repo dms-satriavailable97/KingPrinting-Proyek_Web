@@ -1,5 +1,16 @@
 <?php
 require_once 'config.php';
+
+// Ambil data dari database
+$hero_section = $conn->query("SELECT * FROM website_sections WHERE section_name = 'hero'")->fetch_assoc();
+$services = $conn->query("SELECT * FROM website_items WHERE section_name = 'services' AND item_type = 'service' AND is_active = 1 ORDER BY sort_order")->fetch_all(MYSQLI_ASSOC);
+$steps = $conn->query("SELECT * FROM website_items WHERE section_name = 'steps' AND item_type = 'step' AND is_active = 1 ORDER BY sort_order")->fetch_all(MYSQLI_ASSOC);
+$features = $conn->query("SELECT * FROM website_items WHERE section_name = 'features' AND item_type = 'feature' AND is_active = 1 ORDER BY sort_order")->fetch_all(MYSQLI_ASSOC);
+$faqs = $conn->query("SELECT * FROM website_items WHERE section_name = 'faq' AND item_type = 'faq' AND is_active = 1 ORDER BY sort_order")->fetch_all(MYSQLI_ASSOC);
+
+// Process hero title untuk highlight
+$hero_title = $hero_section['title'] ?? 'Raja di Dunia {highlight}Promosi & Advertising{/highlight}';
+$hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_SPLIT_DELIM_CAPTURE);
 ?>
 
 <!DOCTYPE html>
@@ -44,8 +55,27 @@ require_once 'config.php';
     <section class="hero" id="home">
         <div class="container">
             <div class="hero-content">
-                <h1>Raja di Dunia <span class="highlightsatu">Promosi & Advertising</span></h1>
-                <p>Spanduk, banner, stiker, baliho, brosur, dan berbagai kebutuhan cetak lainnya dengan kualitas kerajaan dan harga terjangkau.</p>
+                <h1>
+                    <?php 
+                    $is_highlight = false;
+                    foreach($hero_parts as $part): 
+                        if ($part === '{highlight}') {
+                            $is_highlight = true;
+                            continue;
+                        } elseif ($part === '{/highlight}') {
+                            $is_highlight = false;
+                            continue;
+                        }
+                        
+                        if ($is_highlight) {
+                            echo '<span class="highlightsatu">' . htmlspecialchars($part) . '</span>';
+                        } else {
+                            echo htmlspecialchars($part);
+                        }
+                    endforeach; 
+                    ?>
+                </h1>
+                <p><?php echo htmlspecialchars($hero_section['subtitle'] ?? 'Spanduk, banner, stiker, baliho, brosur, dan berbagai kebutuhan cetak lainnya dengan kualitas kerajaan dan harga terjangkau.'); ?></p>
                 <div class="hero-buttons">
                     <a href="#produk" class="btn-primary">Lihat Produk</a>
                     <a href="#kontak" class="btn-primary">Kontak Kami</a>
@@ -54,15 +84,28 @@ require_once 'config.php';
             <div class="hero-image">
                 <div class="swiper myHeroSlider">
                     <div class="swiper-wrapper">
-                        <div class="swiper-slide">
-                            <img src="assets/heroslide1.jpg" alt="Slide 1">
-                        </div>
-                        <div class="swiper-slide">
-                            <img src="assets/heroslide2.jpg" alt="Slide 2">
-                        </div>
-                        <div class="swiper-slide">
-                            <img src="assets/heroslide3.jpg" alt="Slide 3">
-                        </div>
+                        <?php
+                        // Ambil slides dari database
+                        $hero_slides = $conn->query("SELECT * FROM website_hero_slides WHERE is_active = 1 ORDER BY sort_order");
+                        if ($hero_slides && $hero_slides->num_rows > 0) {
+                            while($slide = $hero_slides->fetch_assoc()) {
+                                echo '<div class="swiper-slide">';
+                                echo '<img src="' . $slide['image_path'] . '" alt="' . htmlspecialchars($slide['title']) . '">';
+                                echo '</div>';
+                            }
+                        } else {
+                            // Fallback ke gambar default
+                            echo '<div class="swiper-slide">';
+                            echo '<img src="assets/heroslide1.jpg" alt="Slide 1">';
+                            echo '</div>';
+                            echo '<div class="swiper-slide">';
+                            echo '<img src="assets/heroslide2.jpg" alt="Slide 2">';
+                            echo '</div>';
+                            echo '<div class="swiper-slide">';
+                            echo '<img src="assets/heroslide3.jpg" alt="Slide 3">';
+                            echo '</div>';
+                        }
+                        ?>
                     </div>
                     <div class="swiper-pagination"></div>
                 </div>
@@ -71,83 +114,70 @@ require_once 'config.php';
     </section>
 
     <section class="produk" id="produk">
-    <div class="container">
-        <h2 class="section-title">Layanan <span class="highlight">Kami</span></h2>
-        <div class="produk-grid">
-            <div class="produk-item">
-                <div class="produk-icon"><i class="fas fa-flag"></i></div>
-                <h3>Spanduk & Banner</h3>
-                <p>Cetak spanduk dan banner dengan berbagai ukuran dan bahan berkualitas untuk kebutuhan promosi Anda.</p>
-                <button class="btn-order" data-produk="Spanduk & Banner">Pesan Sekarang</button>
-                <a href="produk.php?produk=Spanduk %26 Banner" class="btn-view-design">Lihat Desain</a>
-            </div>
-            <div class="produk-item">
-                <div class="produk-icon"><i class="fas fa-sticky-note"></i></div>
-                <h3>Stiker & Label</h3>
-                <p>Stiker berkualitas untuk produk, kemasan, atau promosi dengan berbagai pilihan bahan ternama dan finishing.</p>
-                <button class="btn-order" data-produk="Stiker & Label">Pesan Sekarang</button>
-                <a href="produk.php?produk=Stiker %26 Label" class="btn-view-design">Lihat Desain</a>
-            </div>
-            <div class="produk-item">
-                <div class="produk-icon"><i class="fas fa-bullhorn"></i></div>
-                <h3>Baliho & Billboard</h3>
-                <p>Solusi cetak baliho ukuran besar untuk iklan luar ruangan dengan ketajaman gambar maksimal dan bahan berkualitas.</p>
-                <button class="btn-order" data-produk="Baliho & Billboard">Pesan Sekarang</button>
-                <a href="produk.php?produk=Baliho %26 Billboard" class="btn-view-design">Lihat Desain</a>
-            </div>
-            <div class="produk-item">
-                <div class="produk-icon"><i class="fas fa-newspaper"></i></div>
-                <h3>Brosur & Flyer</h3>
-                <p>Brosur dan flyer dengan desain menarik untuk promosi bisnis, acara, atau produk Anda.</p>
-                <button class="btn-order" data-produk="Brosur & Flyer">Pesan Sekarang</button>
-                <a href="produk.php?produk=Brosur %26 Flyer" class="btn-view-design">Lihat Desain</a>
-            </div>
-            <div class="produk-item">
-                <div class="produk-icon"><i class="fas fa-box"></i></div>
-                <h3>Kemasan & Dus</h3>
-                <p>Kemasan produk dan dus custom dengan desain menarik untuk meningkatkan nilai produk Anda.</p>
-                <button class="btn-order" data-produk="Kemasan & Dus">Pesan Sekarang</button>
-                <a href="produk.php?produk=Kemasan %26 Dus" class="btn-view-design">Lihat Desain</a>
-            </div>
-            <div class="produk-item">
-                <div class="produk-icon"><i class="fas fa-palette"></i></div>
-                <h3>Produk Custom</h3>
-                <p>Kami juga menerima pesanan produk cetak custom sesuai kebutuhan khusus Anda.</p>
-                <button class="btn-order" data-produk="Produk Custom">Pesan Sekarang</button>
-                <a href="produk.php?produk=Produk Custom" class="btn-view-design">Lihat Desain</a>
+        <div class="container">
+            <h2 class="section-title">Layanan <span class="highlight">Kami</span></h2>
+            <div class="produk-grid">
+                <?php if (!empty($services)): ?>
+                    <?php foreach($services as $service): ?>
+                    <div class="produk-item">
+                        <div class="produk-icon"><i class="<?php echo $service['icon']; ?>"></i></div>
+                        <h3><?php echo htmlspecialchars($service['title']); ?></h3>
+                        <p><?php echo htmlspecialchars($service['description']); ?></p>
+                        <button class="btn-order" data-produk="<?php echo htmlspecialchars($service['title']); ?>">
+                            <?php echo htmlspecialchars($service['button_text'] ?? 'Pesan Sekarang'); ?>
+                        </button>
+                        <a href="produk.php?produk=<?php echo urlencode($service['title']); ?>" class="btn-view-design">Lihat Desain</a>
+                    </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <!-- Fallback jika tidak ada layanan -->
+                    <div class="produk-item">
+                        <div class="produk-icon"><i class="fas fa-flag"></i></div>
+                        <h3>Spanduk & Banner</h3>
+                        <p>Cetak spanduk dan banner dengan berbagai ukuran dan bahan berkualitas untuk kebutuhan promosi Anda.</p>
+                        <button class="btn-order" data-produk="Spanduk & Banner">Pesan Sekarang</button>
+                        <a href="produk.php?produk=Spanduk %26 Banner" class="btn-view-design">Lihat Desain</a>
+                    </div>
+                    <div class="produk-item">
+                        <div class="produk-icon"><i class="fas fa-sticky-note"></i></div>
+                        <h3>Stiker & Label</h3>
+                        <p>Stiker berkualitas untuk produk, kemasan, atau promosi dengan berbagai pilihan bahan ternama dan finishing.</p>
+                        <button class="btn-order" data-produk="Stiker & Label">Pesan Sekarang</button>
+                        <a href="produk.php?produk=Stiker %26 Label" class="btn-view-design">Lihat Desain</a>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
     <section class="cara-kerja" id="cara-kerja">
         <div class="container">
             <h2 class="section-title">Cara Memesan di <span class="highlight">King Advertising</span></h2>
             <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-icon"><i class="fas fa-mouse-pointer"></i></div>
-                    <h3>Pilih Produk</h3>
-                    <p>Pilih produk dan klik tombol "Pesan Sekarang" untuk membuka form pemesanan.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-icon"><i class="fas fa-ruler-combined"></i></div>
-                    <h3>Isi Form</h3>
-                    <p>Lengkapi detail pesanan Anda pada form yang muncul, seperti ukuran, bahan, dan jumlah.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-icon"><i class="fab fa-whatsapp"></i></div>
-                    <h3>Kirim ke WhatsApp</h3>
-                    <p>Klik tombol kirim dan data pesanan Anda akan kami terima di sistem dan juga WhatsApp.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <div class="step-icon"><i class="fas fa-shipping-fast"></i></div>
-                    <h3>Produk Siap</h3>
-                    <p>Produk selesai dibuat, Anda dihubungi untuk proses pengambilan atau pengiriman.</p>
-                </div>
+                <?php if (!empty($steps)): ?>
+                    <?php foreach($steps as $index => $step): ?>
+                    <div class="step">
+                        <div class="step-number"><?php echo $index + 1; ?></div>
+                        <div class="step-icon"><i class="<?php echo $step['icon']; ?>"></i></div>
+                        <h3><?php echo htmlspecialchars($step['title']); ?></h3>
+                        <p><?php echo htmlspecialchars($step['description']); ?></p>
+                    </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <!-- Fallback jika tidak ada steps -->
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-icon"><i class="fas fa-mouse-pointer"></i></div>
+                        <h3>Pilih Produk</h3>
+                        <p>Pilih produk dan klik tombol "Pesan Sekarang" untuk membuka form pemesanan.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-icon"><i class="fas fa-ruler-combined"></i></div>
+                        <h3>Isi Form</h3>
+                        <p>Lengkapi detail pesanan Anda pada form yang muncul, seperti ukuran, bahan, dan jumlah.</p>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>
@@ -156,22 +186,27 @@ require_once 'config.php';
         <div class="container">
             <h2 class="section-title">Mengapa Memilih <span class="highlight">King Advertising</span>?</h2>
             <div class="keunggulan-grid">
-                <div class="keunggulan-item">
-                    <div class="keunggulan-icon"><i class="fas fa-crown"></i></div>
-                    <h3>Kualitas Terbaik</h3><p>Hasil cetak dengan kualitas terbaik.</p>
-                </div>
-                <div class="keunggulan-item">
-                    <div class="keunggulan-icon"><i class="fas fa-bolt"></i></div>
-                    <h3>Proses Cepat</h3><p>Pengerjaan cepat tanpa mengorbankan kualitas.</p>
-                </div>
-                <div class="keunggulan-item">
-                    <div class="keunggulan-icon"><i class="fas fa-tags"></i></div>
-                    <h3>Harga Terjangkau</h3><p>Harga kompetitif dengan kualitas yang tidak mengecewakan.</p>
-                </div>
-                <div class="keunggulan-item">
-                    <div class="keunggulan-icon"><i class="fas fa-headset"></i></div>
-                    <h3>Layanan Ramah</h3><p>Tim customer service yang siap membantu Anda.</p>
-                </div>
+                <?php if (!empty($features)): ?>
+                    <?php foreach($features as $feature): ?>
+                    <div class="keunggulan-item">
+                        <div class="keunggulan-icon"><i class="<?php echo $feature['icon']; ?>"></i></div>
+                        <h3><?php echo htmlspecialchars($feature['title']); ?></h3>
+                        <p><?php echo htmlspecialchars($feature['description']); ?></p>
+                    </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <!-- Fallback jika tidak ada features -->
+                    <div class="keunggulan-item">
+                        <div class="keunggulan-icon"><i class="fas fa-crown"></i></div>
+                        <h3>Kualitas Terbaik</h3>
+                        <p>Hasil cetak dengan kualitas terbaik.</p>
+                    </div>
+                    <div class="keunggulan-item">
+                        <div class="keunggulan-icon"><i class="fas fa-bolt"></i></div>
+                        <h3>Proses Cepat</h3>
+                        <p>Pengerjaan cepat tanpa mengorbankan kualitas.</p>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>
@@ -180,16 +215,12 @@ require_once 'config.php';
     <section class="faq-section" id="faq">
         <div class="container">
             <div class="faq-wrapper">
-                
-                <!-- KOLOM KIRI: Judul & CTA Bantuan -->
                 <div class="faq-sidebar">
                     <div class="faq-header-block">
                         <span class="sub-title">Tanya Jawab</span>
                         <h2 class="section-title-left">Pertanyaan <span class="highlight">Umum</span></h2>
                         <p class="faq-desc">Berikut adalah beberapa hal yang sering ditanyakan oleh pelanggan kami. Klik pada pertanyaan untuk melihat jawabannya.</p>
                     </div>
-                    
-                    <!-- Kotak Bantuan Tambahan -->
                     <div class="help-card">
                         <div class="help-icon"><i class="fab fa-whatsapp"></i></div>
                         <div class="help-text">
@@ -199,66 +230,47 @@ require_once 'config.php';
                         </div>
                     </div>
                 </div>
-
-                <!-- KOLOM KANAN: List Accordion FAQ -->
                 <div class="faq-list">
-                    
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h3>Berapa lama proses pengerjaan pesanan?</h3>
-                            <i class="fas fa-chevron-down"></i>
+                    <?php if (!empty($faqs)): ?>
+                        <?php foreach($faqs as $faq): ?>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <h3><?php echo htmlspecialchars($faq['title']); ?></h3>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p><?php echo htmlspecialchars($faq['description']); ?></p>
+                            </div>
                         </div>
-                        <div class="faq-answer">
-                            <p>Waktu pengerjaan tergantung jenis produk dan jumlah pesanan. Untuk spanduk/banner standar biasanya selesai dalam 1-2 hari kerja. Untuk pesanan custom atau jumlah besar, estimasi waktu akan diinfokan di awal.</p>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <!-- Fallback jika tidak ada FAQ -->
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <h3>Berapa lama proses pengerjaan pesanan?</h3>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p>Waktu pengerjaan tergantung jenis produk dan jumlah pesanan. Untuk spanduk/banner standar biasanya selesai dalam 1-2 hari kerja.</p>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h3>Apakah bisa bantu buatkan desainnya?</h3>
-                            <i class="fas fa-chevron-down"></i>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <h3>Apakah bisa bantu buatkan desainnya?</h3>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p>Tentu saja! Kami memiliki tim desainer profesional yang siap membantu.</p>
+                            </div>
                         </div>
-                        <div class="faq-answer">
-                            <p>Tentu saja! Kami memiliki tim desainer profesional yang siap membantu. Silakan lampirkan detail, teks, atau sketsa kasar ide Anda pada kolom catatan saat memesan.</p>
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h3>Apakah ada minimal order?</h3>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Sebagian besar produk (spanduk, banner) bisa dipesan satuan. Namun untuk produk kecil seperti stiker label atau kemasan dus, mungkin ada minimum order untuk efisiensi harga.</p>
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h3>Bagaimana sistem pembayarannya?</h3>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Pembayaran dilakukan melalui transfer bank atau e-wallet (DANA/OVO/GoPay). Detail rekening akan dikirimkan otomatis ke WhatsApp Anda setelah mengisi form pemesanan.</p>
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h3>Apakah melayani pengiriman luar kota?</h3>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Ya, kami melayani pengiriman ke seluruh Indonesia menggunakan ekspedisi terpercaya (JNE, J&T, Cargo). Ongkir dihitung berdasarkan berat dan lokasi tujuan.</p>
-                        </div>
-                    </div>
-
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </section>
     <!-- AKHIR SECTION FAQ -->
 
+    <!-- Modal dan Footer tetap sama -->
     <div class="modal" id="orderModal">
         <div class="modal-content">
             <span class="close-order">×</span>
@@ -321,26 +333,62 @@ require_once 'config.php';
     </div>
 
     <footer class="footer" id="kontak">
-        <div class="container">
-            <div class="map-container"><iframe class="map-iframe" src="https://www.google.com/maps/embed?pb=!4v1762266865140!6m8!1m7!1sWhc2abtYaDzUcfT_F7LnHg!2m2!1d-0.4730531793778449!2d117.1653334981797!3f326.50841155499506!4f-15.840080292808594!5f1.0886293032444474" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
-            <div class="footer-content">
-                <div class="footer-section">
-                    <div class="footer-logo"><h3>King Printing</h3></div>
-                    <p>Solusi cetak terpercaya untuk berbagai kebutuhan promosi dan bisnis Anda dengan kualitas Terbaik.</p>
-                    <div class="social-links"><a href="#"><i class="fab fa-facebook"></i></a><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-whatsapp"></i></a></div>
-                </div>
-                <div class="footer-section">
-                    <h4>Kontak Kami</h4>
-                    <div class="contact-info"><p><i class="fas fa-phone"></i> +62 887-0584-4251</p><p><i class="fas fa-envelope"></i> info@kingadvertising.com</p><p><i class="fas fa-map-marker-alt"></i> Jl. Ahmad Yani 2 No.12 RT.10, Temindung Permai, Kec. Sungai Pinang, Kota Samarinda, Kalimantan Timur</p></div>
-                </div>
-                <div class="footer-section">
-                    <h4>Jam Operasional</h4>
-                    <div class="operational-hours"><p>Senin - Jumat: 08.00 - 17.00</p><p>Sabtu: 08.00 - 15.00</p><p>Minggu: Tutup</p></div>
+    <div class="container">
+        <div class="map-container">
+            <?php
+            // Ambil data kontak dari database
+            $contact_data = $conn->query("SELECT * FROM website_sections WHERE section_name = 'contact'");
+            if ($contact_data && $contact_data->num_rows > 0) {
+                $contact = $contact_data->fetch_assoc();
+                echo $contact['additional_info'] ?? '<iframe class="map-iframe" src="https://www.google.com/maps/embed?pb=!4v1762266865140!6m8!1m7!1sWhc2abtYaDzUcfT_F7LnHg!2m2!1d-0.4730531793778449!2d117.1653334981797!3f326.50841155499506!4f-15.840080292808594!5f1.0886293032444474" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
+            }
+            ?>
+        </div>
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo"><h3>King Printing</h3></div>
+                <p>Solusi cetak terpercaya untuk berbagai kebutuhan promosi dan bisnis Anda dengan kualitas Terbaik.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
                 </div>
             </div>
-            <div class="footer-bottom"><p>© 2025 King Advertising. All rights reserved.</p></div>
+            <div class="footer-section">
+                <h4>Kontak Kami</h4>
+                <div class="contact-info">
+                    <?php if (isset($contact)): ?>
+                        <p><i class="fas fa-phone"></i> <?php echo htmlspecialchars($contact['title']); ?></p>
+                        <p><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($contact['subtitle']); ?></p>
+                        <p><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($contact['description']); ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Jam Operasional</h4>
+                <div class="operational-hours">
+                    <?php
+                    // Ambil jam operasional dari database
+                    $hours_result = $conn->query("SELECT * FROM operational_hours ORDER BY sort_order");
+                    if ($hours_result && $hours_result->num_rows > 0) {
+                        while($hour = $hours_result->fetch_assoc()) {
+                            echo '<p>' . htmlspecialchars($hour['hours_text']) . '</p>';
+                        }
+                    } else {
+                        // Fallback jika tidak ada data
+                        echo '<p>Senin - Jumat: 08.00 - 17.00</p>';
+                        echo '<p>Sabtu: 08.00 - 15.00</p>';
+                        echo '<p>Minggu: Tutup</p>';
+                    }
+                    ?>
+                </div>
+            </div>
         </div>
-    </footer>
+        <div class="footer-bottom">
+            <p><?php echo htmlspecialchars($contact['meta_data'] ?? '© 2025 King Advertising. All rights reserved.'); ?></p>
+        </div>
+    </div>
+</footer>
 
     <a href="https://wa.me/6288705844251?text=Halo%20kak%2C%20saya%20ingin%20melakukan%20pemesanan" class="whatsapp-sticky" target="_blank" data-tooltip="Pesan via WhatsApp"><i class="fab fa-whatsapp"></i></a>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>

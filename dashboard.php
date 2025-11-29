@@ -70,6 +70,7 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                     <li><a href="pesanan.php"><i class="fas fa-inbox"></i> Pesanan</a></li>
                     <li><a href="riwayat-pesanan.php"><i class="fas fa-history"></i> Riwayat Pesanan</a></li>
                     <li><a href="kelola-produk.php"><i class="fas fa-box-open"></i> Kelola Produk</a></li>
+                    <li><a href="kelola-tampilan.php"><i class="fas fa-palette"></i> Kelola Tampilan</a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer"><a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
@@ -102,6 +103,8 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                     <div class="card-info"><p>Pesanan Diproses</p><h4><?php echo $jumlah_proses; ?></h4></div>
                 </div>
             </section>
+
+            
 
             <section class="customers-table">
                 <div class="table-header"><h3>Ringkasan Pesanan Aktif</h3></div>
