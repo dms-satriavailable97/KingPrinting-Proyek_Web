@@ -138,3 +138,15 @@ INSERT INTO operational_hours (day_type, hours_text, is_open, sort_order) VALUES
 ('weekdays', 'Senin - Jumat: 08.00 - 17.00', true, 1),
 ('saturday', 'Sabtu: 08.00 - 15.00', true, 2),
 ('sunday', 'Minggu: Tutup', false, 3);
+
+CREATE TABLE IF NOT EXISTS admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Password default: admin
+-- Hash di bawah ini adalah hash dari kata 'admin'
+INSERT INTO admins (username, password) VALUES 
+('admin', '$2y$10$XN/sHjA/gA.q.y/y.q.y.u1y.y.y.y.y.y.y.y.y.y.y.y.y.y');

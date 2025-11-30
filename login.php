@@ -10,21 +10,38 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
 
 $error = '';
 
-// Proses Login saat tombol ditekan
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $admin_username = "admin"; // Ganti jika ingin username lain
-    $admin_password = "admin"; // Ganti jika ingin password lain
-
-    $username = $_POST['username'];
+    $username = $conn->real_escape_string($_POST['username']);
     $password = $_POST['password'];
 
-    if ($username === $admin_username && $password === $admin_password) {
-        $_SESSION['loggedin'] = true;
-        $_SESSION['username'] = $username;
-        header("location: dashboard.php");
-        exit;
-    } else {
-        $error = "Username atau Password salah!";
+    // Cek user di database (tabel admins)
+    $sql = "SELECT id, username, password FROM admins WHERE username = ?";
+    
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows == 1) {
+            $stmt->bind_result($id, $db_username, $db_password);
+            $stmt->fetch();
+            
+            // Verifikasi Password Hash
+            if (password_verify($password, $db_password)) {
+                // Password benar, set session
+                $_SESSION['loggedin'] = true;
+                $_SESSION['id'] = $id;
+                $_SESSION['username'] = $db_username;
+                
+                header("location: dashboard.php");
+                exit;
+            } else {
+                $error = "Password salah!";
+            }
+        } else {
+            $error = "Username tidak ditemukan!";
+        }
+        $stmt->close();
     }
 }
 ?>

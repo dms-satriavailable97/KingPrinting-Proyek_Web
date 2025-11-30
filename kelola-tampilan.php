@@ -117,6 +117,7 @@ require_once 'config.php';
                     <li><a href="riwayat-pesanan.php"><i class="fas fa-history"></i> Riwayat Pesanan</a></li>
                     <li><a href="kelola-produk.php"><i class="fas fa-box-open"></i> Kelola Produk</a></li>
                     <li><a href="kelola-tampilan.php" class="active"><i class="fas fa-palette"></i> Kelola Tampilan</a></li>
+                    <li><a href="kelola-akun.php"><i class="fas fa-users-cog"></i> Kelola Akun</a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer"><a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></div>

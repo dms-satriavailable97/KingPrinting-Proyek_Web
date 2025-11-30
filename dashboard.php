@@ -36,11 +36,46 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
     <style>
-        /* === CSS UNTUK MODAL & STATUS INTERAKTIF (FIX) === */
-        /* Modal Detail */
-        .detail-modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
-        .detail-modal-content { background-color: #fefefe; margin: 10% auto; padding: 25px 35px; border-radius: 15px; width: 80%; max-width: 600px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: animatetop 0.4s; }
-        @keyframes animatetop { from {top: -300px; opacity: 0} to {top: 0; opacity: 1} }
+        /* === MODAL CENTERED FIX === */
+        .detail-modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1001; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; 
+            background-color: rgba(0,0,0,0.6); 
+            backdrop-filter: blur(5px); 
+        }
+
+        .detail-modal-content { 
+            background-color: #fefefe; 
+            padding: 25px 35px; 
+            border-radius: 15px; 
+            width: 90%; 
+            max-width: 600px; 
+            
+            /* CENTERED */
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            margin: 0;
+            
+            max-height: 90vh;
+            overflow-y: auto;
+            
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+            animation: fadein 0.3s ease-out; 
+        }
+
+        @keyframes fadein { 
+            from { opacity: 0; transform: translate(-50%, -55%); } 
+            to { opacity: 1; transform: translate(-50%, -50%); } 
+        }
+
         .detail-modal-header { padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .detail-modal-header h2 { margin: 0; font-size: 1.6rem; color: var(--brand-dark-red); }
         .close-detail-modal { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
@@ -71,6 +106,7 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                     <li><a href="riwayat-pesanan.php"><i class="fas fa-history"></i> Riwayat Pesanan</a></li>
                     <li><a href="kelola-produk.php"><i class="fas fa-box-open"></i> Kelola Produk</a></li>
                     <li><a href="kelola-tampilan.php"><i class="fas fa-palette"></i> Kelola Tampilan</a></li>
+                    <li><a href="kelola-akun.php"><i class="fas fa-users-cog"></i> Kelola Akun</a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer"><a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
@@ -83,8 +119,7 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                 <div class="header-right">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <!-- Input Search dengan ID searchInput -->
-                        <input type="text" id="searchInput" placeholder="Cari Pesanan...">
+                        <input type="text" id="searchInput" placeholder="Cari Pesanan (Halaman ini)...">
                     </div>
                 </div>
             </header>
@@ -103,8 +138,6 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                     <div class="card-info"><p>Pesanan Diproses</p><h4><?php echo $jumlah_proses; ?></h4></div>
                 </div>
             </section>
-
-            
 
             <section class="customers-table">
                 <div class="table-header"><h3>Ringkasan Pesanan Aktif</h3></div>
@@ -164,149 +197,118 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
         </div>
     </div>
 
-    <div id="pilihProdukModal" class="admin-modal"><!-- ... Konten Modal Produk ... --></div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const table = document.getElementById('ordersTable');
+        const detailModal = document.getElementById('detailModal');
+        const closeDetailModal = document.querySelector('.close-detail-modal');
+        let activeDropdown = null;
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const table = document.getElementById('ordersTable');
-    const detailModal = document.getElementById('detailModal');
-    const closeDetailModal = document.querySelector('.close-detail-modal');
-    let activeDropdown = null;
+        const searchInput = document.getElementById('searchInput');
+        const tableRows = document.querySelectorAll('#ordersTable tbody tr');
 
-    // === LOGIKA PENCARIAN REAL-TIME ===
-    const searchInput = document.getElementById('searchInput');
-    // Pastikan kita mengambil baris dari tbody saja, bukan header
-    const tableRows = document.querySelectorAll('#ordersTable tbody tr');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                tableRows.forEach(row => {
+                    if (row.cells.length === 1 && row.cells[0].getAttribute('colspan')) { return; }
+                    const textId = row.cells[0] ? row.cells[0].textContent.toLowerCase() : '';
+                    const textNama = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
+                    const textProduk = row.cells[2] ? row.cells[2].textContent.toLowerCase() : '';
+                    if (textId.includes(searchTerm) || textNama.includes(searchTerm) || textProduk.includes(searchTerm)) {
+                        row.style.display = ""; 
+                    } else {
+                        row.style.display = "none"; 
+                    }
+                });
+            });
+        }
 
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function() {
-            const searchTerm = this.value.toLowerCase().trim();
+        function updateOrderStatus(orderId, newStatus) {
+            const formData = new FormData();
+            formData.append('id', orderId);
+            formData.append('status', newStatus);
+            fetch('update-status.php', { method: 'POST', body: formData })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload(); 
+                } else {
+                    alert('Gagal: ' + data.message);
+                }
+            }).catch(() => alert('Terjadi kesalahan jaringan.'));
+        }
 
-            tableRows.forEach(row => {
-                // Cek apakah baris ini adalah baris pesan "Tidak ada pesanan"
-                if (row.cells.length === 1 && row.cells[0].getAttribute('colspan')) {
-                    return; 
+        if(table) {
+            table.addEventListener('click', function(e) {
+                const statusTrigger = e.target.closest('.status.interactive');
+                const dropdownItem = e.target.closest('.status-dropdown li');
+                const detailButton = e.target.closest('.action-btn.detail');
+
+                if (statusTrigger) {
+                    const dropdown = statusTrigger.nextElementSibling;
+                    if (activeDropdown && activeDropdown !== dropdown) activeDropdown.style.display = 'none';
+                    const currentStatus = statusTrigger.dataset.currentStatus;
+                    let options = '';
+                    if (currentStatus === 'Tertunda') options = `<li data-new-status="Proses">Proses</li><li data-new-status="Selesai">Selesai</li>`;
+                    else if (currentStatus === 'Proses') options = `<li data-new-status="Selesai">Selesai</li><li data-new-status="Tertunda">Tertunda</li>`;
+                    dropdown.innerHTML = options;
+                    dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
+                    activeDropdown = (dropdown.style.display === 'block') ? dropdown : null;
+                    return;
                 }
 
-                // Ambil data dari kolom ID (index 0), Nama (index 1), dan Produk (index 2)
-                const textId = row.cells[0] ? row.cells[0].textContent.toLowerCase() : '';
-                const textNama = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
-                const textProduk = row.cells[2] ? row.cells[2].textContent.toLowerCase() : '';
+                if (dropdownItem) {
+                    const newStatus = dropdownItem.dataset.newStatus;
+                    const orderId = dropdownItem.closest('tr').dataset.id;
+                    updateOrderStatus(orderId, newStatus);
+                    if (activeDropdown) activeDropdown.style.display = 'none';
+                    activeDropdown = null;
+                    return;
+                }
 
-                // Cek apakah ada yang cocok
-                if (textId.includes(searchTerm) || textNama.includes(searchTerm) || textProduk.includes(searchTerm)) {
-                    row.style.display = ""; // Tampilkan kembali
-                } else {
-                    row.style.display = "none"; // Sembunyikan
+                if (detailButton) {
+                    const orderId = detailButton.closest('tr').getAttribute('data-id');
+                    if (orderId) {
+                        fetch(`get-order-details.php?id=${orderId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const order = data.order;
+                                document.getElementById('detailModalTitle').textContent = `Detail Pesanan #${order.id_formatted}`;
+                                const modalBody = document.getElementById('detailModalBody');
+                                const statusClass = order.status.toLowerCase();
+                                modalBody.innerHTML = `
+                                    <div class="detail-item"><strong>Nama Pemesan</strong><span>${order.nama_pemesan}</span></div>
+                                    <div class="detail-item"><strong>Telepon</strong><span>${order.telepon}</span></div>
+                                    <div class="detail-item"><strong>Produk</strong><span>${order.produk}</span></div>
+                                    <div class="detail-item"><strong>Tanggal Masuk</strong><span>${order.tanggal_masuk}</span></div>
+                                    <div class="detail-item"><strong>Ukuran</strong><span>${order.ukuran || '-'} cm</span></div>
+                                    <div class="detail-item"><strong>Bahan</strong><span>${order.bahan || '-'}</span></div>
+                                    <div class="detail-item"><strong>Jumlah</strong><span>${order.jumlah} pcs</span></div>
+                                    <div class="detail-item"><strong>Status</strong><span class="status ${statusClass}">${order.status}</span></div>
+                                    <div class="detail-item full-width"><strong>Catatan</strong><textarea readonly>${order.catatan || 'Tidak ada catatan.'}</textarea></div>
+                                `;
+                                detailModal.style.display = 'block';
+                            } else {
+                                alert('Gagal memuat detail: ' + data.message);
+                            }
+                        }).catch(() => alert('Terjadi kesalahan jaringan.'));
+                    }
+                    return;
                 }
             });
-        });
-    }
-    // ==================================
-
-    // --- FUNGSI UNTUK MENGUBAH STATUS PESANAN ---
-    function updateOrderStatus(orderId, newStatus) {
-        const formData = new FormData();
-        formData.append('id', orderId);
-        formData.append('status', newStatus);
-
-        fetch('update-status.php', { method: 'POST', body: formData })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Langsung reload halaman untuk update semua data (stats dan tabel)
-                window.location.reload(); 
-            } else {
-                alert('Gagal: ' + data.message);
-            }
-        }).catch(() => alert('Terjadi kesalahan jaringan.'));
-    }
-
-    // --- EVENT LISTENER UTAMA PADA TABEL ---
-    if(table) {
-        table.addEventListener('click', function(e) {
-            const statusTrigger = e.target.closest('.status.interactive');
-            const dropdownItem = e.target.closest('.status-dropdown li');
-            const detailButton = e.target.closest('.action-btn.detail');
-
-            // --- Logika untuk membuka dropdown status ---
-            if (statusTrigger) {
-                const dropdown = statusTrigger.nextElementSibling;
-                if (activeDropdown && activeDropdown !== dropdown) activeDropdown.style.display = 'none';
-                
-                const currentStatus = statusTrigger.dataset.currentStatus;
-                let options = '';
-                if (currentStatus === 'Tertunda') {
-                    options = `<li data-new-status="Proses">Proses</li><li data-new-status="Selesai">Selesai</li>`;
-                } else if (currentStatus === 'Proses') {
-                    options = `<li data-new-status="Selesai">Selesai</li><li data-new-status="Tertunda">Tertunda</li>`;
-                }
-                dropdown.innerHTML = options;
-
-                const isVisible = dropdown.style.display === 'block';
-                dropdown.style.display = isVisible ? 'none' : 'block';
-                activeDropdown = isVisible ? null : dropdown;
-                return;
-            }
-
-            // --- Logika untuk memilih item dari dropdown ---
-            if (dropdownItem) {
-                const newStatus = dropdownItem.dataset.newStatus;
-                const orderId = dropdownItem.closest('tr').dataset.id;
-                updateOrderStatus(orderId, newStatus);
-                if (activeDropdown) activeDropdown.style.display = 'none';
-                activeDropdown = null;
-                return;
-            }
-
-            // --- Logika untuk tombol "Detail" ---
-            if (detailButton) {
-                const orderId = detailButton.closest('tr').getAttribute('data-id');
-                if (orderId) {
-                    fetch(`get-order-details.php?id=${orderId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const order = data.order;
-                            document.getElementById('detailModalTitle').textContent = `Detail Pesanan #${order.id_formatted}`;
-                            const modalBody = document.getElementById('detailModalBody');
-                            const statusClass = order.status.toLowerCase();
-                            modalBody.innerHTML = `
-                                <div class="detail-item"><strong>Nama Pemesan</strong><span>${order.nama_pemesan}</span></div>
-                                <div class="detail-item"><strong>Telepon</strong><span>${order.telepon}</span></div>
-                                <div class="detail-item"><strong>Produk</strong><span>${order.produk}</span></div>
-                                <div class="detail-item"><strong>Tanggal Masuk</strong><span>${order.tanggal_masuk}</span></div>
-                                <div class="detail-item"><strong>Ukuran</strong><span>${order.ukuran || '-'} cm</span></div>
-                                <div class="detail-item"><strong>Bahan</strong><span>${order.bahan || '-'}</span></div>
-                                <div class="detail-item"><strong>Jumlah</strong><span>${order.jumlah} pcs</span></div>
-                                <div class="detail-item"><strong>Status</strong><span class="status ${statusClass}">${order.status}</span></div>
-                                <div class="detail-item full-width"><strong>Catatan</strong><textarea readonly>${order.catatan || 'Tidak ada catatan.'}</textarea></div>
-                            `;
-                            detailModal.style.display = 'block';
-                        } else {
-                            alert('Gagal memuat detail: ' + data.message);
-                        }
-                    }).catch(() => alert('Terjadi kesalahan jaringan.'));
-                }
-                return;
-            }
-        });
-    }
-
-    // --- EVENT LISTENER UNTUK MENUTUP DROPDOWN/MODAL ---
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.status-wrapper') && activeDropdown) {
-            activeDropdown.style.display = 'none';
-            activeDropdown = null;
         }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.status-wrapper') && activeDropdown) {
+                activeDropdown.style.display = 'none';
+                activeDropdown = null;
+            }
+        });
+        if(closeDetailModal) closeDetailModal.onclick = () => { detailModal.style.display = "none"; }
+        window.onclick = (event) => { if (event.target == detailModal) detailModal.style.display = "none"; }
     });
-    if(closeDetailModal) {
-        closeDetailModal.onclick = () => { detailModal.style.display = "none"; }
-    }
-    window.onclick = (event) => {
-        if (event.target == detailModal) { detailModal.style.display = "none"; }
-    }
-});
-</script>
+    </script>
 </body>
 </html>
