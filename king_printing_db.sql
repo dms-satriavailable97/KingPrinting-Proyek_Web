@@ -118,11 +118,11 @@ INSERT INTO website_items (section_name, item_type, title, description, icon, so
 
 -- Insert default FAQs
 INSERT INTO website_items (section_name, item_type, title, description, sort_order, is_active) VALUES 
-('faq', 'faq', 'Berapa lama proses pengerjaan pesanan?', 'Waktu pengerjaan tergantung jenis produk dan jumlah pesanan. Untuk spanduk/banner standar biasanya selesai dalam 1-2 hari kerja. Untuk pesanan custom atau jumlah besar, estimasi waktu akan diinfokan di awal.', 1, true),
-('faq', 'faq', 'Apakah bisa bantu buatkan desainnya?', 'Tentu saja! Kami memiliki tim desainer profesional yang siap membantu. Silakan lampirkan detail, teks, atau sketsa kasar ide Anda pada kolom catatan saat memesan.', 2, true),
+('faq', 'faq', 'Berapa lama proses pengerjaan pesanan?', 'Waktu pengerjaan tergantung pada jenis produk dan jumlah pesanan. Untuk spanduk/banner standar, proses biasanya memakan waktu 20–30 menit. Untuk pesanan custom atau dalam jumlah besar, estimasi waktu pengerjaan akan kami informasikan di awal.', 1, true),
+('faq', 'faq', 'Apakah bisa bantu buatkan desainnya?', 'Tentu saja! Kami dapat membantu dalam membuat desainnya. Silakan lampirkan detail, teks, atau sketsa kasar ide Anda pada kolom catatan saat memesan.', 2, true),
 ('faq', 'faq', 'Apakah ada minimal order?', 'Sebagian besar produk (spanduk, banner) bisa dipesan satuan. Namun untuk produk kecil seperti stiker label atau kemasan dus, mungkin ada minimum order untuk efisiensi harga.', 3, true),
-('faq', 'faq', 'Bagaimana sistem pembayarannya?', 'Pembayaran dilakukan melalui transfer bank atau e-wallet (DANA/OVO/GoPay). Detail rekening akan dikirimkan otomatis ke WhatsApp Anda setelah mengisi form pemesanan.', 4, true),
-('faq', 'faq', 'Apakah melayani pengiriman luar kota?', 'Ya, kami melayani pengiriman ke seluruh Indonesia menggunakan ekspedisi terpercaya (JNE, J&T, Cargo). Ongkir dihitung berdasarkan berat dan lokasi tujuan.', 5, true);
+('faq', 'faq', 'Bagaimana sistem pembayarannya?', 'Pembayaran dilakukan melalui transfer bank (BCA) atau bayar langsung di tempat.', 4, true),
+('faq', 'faq', 'Bagaimana cara mengambil pesanan yang sudah selesai?', 'Pesanan yang telah selesai akan kami konfirmasi kepada pelanggan untuk segera diambil di King Printing.', 5, true);
 
 -- Tambah table baru untuk jam operasional
 CREATE TABLE IF NOT EXISTS operational_hours (
