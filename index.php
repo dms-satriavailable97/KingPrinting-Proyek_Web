@@ -18,7 +18,7 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>King Advertising - Layanan Cetak Online Profesional</title>
+    <title>King Printing - Layanan Cetak Profesional</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,7 +75,7 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
                     endforeach; 
                     ?>
                 </h1>
-                <p><?php echo htmlspecialchars($hero_section['subtitle'] ?? 'Spanduk, banner, stiker, baliho, brosur, dan berbagai kebutuhan cetak lainnya dengan kualitas kerajaan dan harga terjangkau.'); ?></p>
+                <p><?php echo htmlspecialchars($hero_section['subtitle'] ?? 'Spanduk, banner, stiker, baliho, brosur, dan berbagai kebutuhan cetak lainnya dengan kualitas Terbaik dan harga terjangkau.'); ?></p>
                 <div class="hero-buttons">
                     <a href="#produk" class="btn-primary">Lihat Produk</a>
                     <a href="#kontak" class="btn-primary">Kontak Kami</a>
@@ -152,7 +152,7 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
 
     <section class="cara-kerja" id="cara-kerja">
         <div class="container">
-            <h2 class="section-title">Cara Memesan di <span class="highlight">King Advertising</span></h2>
+            <h2 class="section-title">Cara Memesan di <span class="highlight">King Printing</span></h2>
             <div class="steps">
                 <?php if (!empty($steps)): ?>
                     <?php foreach($steps as $index => $step): ?>
@@ -184,7 +184,7 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
 
     <section class="keunggulan">
         <div class="container">
-            <h2 class="section-title">Mengapa Memilih <span class="highlight">King Advertising</span>?</h2>
+            <h2 class="section-title">Mengapa Memilih <span class="highlight">King Printing</span>?</h2>
             <div class="keunggulan-grid">
                 <?php if (!empty($features)): ?>
                     <?php foreach($features as $feature): ?>
@@ -348,11 +348,6 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
             <div class="footer-section">
                 <div class="footer-logo"><h3>King Printing</h3></div>
                 <p>Solusi cetak terpercaya untuk berbagai kebutuhan promosi dan bisnis Anda dengan kualitas Terbaik.</p>
-                <div class="social-links">
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-whatsapp"></i></a>
-                </div>
             </div>
             <div class="footer-section">
                 <h4>Kontak Kami</h4>
@@ -376,8 +371,7 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
                         }
                     } else {
                         // Fallback jika tidak ada data
-                        echo '<p>Senin - Jumat: 08.00 - 17.00</p>';
-                        echo '<p>Sabtu: 08.00 - 15.00</p>';
+                        echo '<p>Senin - Sabtu: 09.00 - 18.00</p>';
                         echo '<p>Minggu: Tutup</p>';
                     }
                     ?>
@@ -385,7 +379,7 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
             </div>
         </div>
         <div class="footer-bottom">
-            <p><?php echo htmlspecialchars($contact['meta_data'] ?? '© 2025 King Advertising. All rights reserved.'); ?></p>
+            <p><?php echo htmlspecialchars($contact['meta_data'] ?? '© 2025 King Printing. All rights reserved.'); ?></p>
         </div>
     </div>
 </footer>

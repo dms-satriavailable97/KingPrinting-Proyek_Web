@@ -97,7 +97,7 @@ if(orderForm) {
             return;
         }
         
-        const message = `Halo King Advertising, saya ingin memesan:\n\n` +
+        const message = `Halo King Printing, saya ingin memesan:\n\n` +
                        `📋 *Detail Pesanan:*\n` +
                        `Produk: ${produk}\n` +
                        `Ukuran: ${ukuran} cm\n` +

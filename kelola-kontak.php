@@ -25,10 +25,10 @@ if ($result) {
 
 // Set default values from database
 $phone = $contact_section['title'] ?? '+62 887-0584-4251';
-$email = $contact_section['subtitle'] ?? 'info@kingadvertising.com';
+$email = $contact_section['subtitle'] ?? 'kingdprint@gmail.com';
 $address = $contact_section['description'] ?? 'Jl. Ahmad Yani 2 No.12 RT.10, Temindung Permai, Kec. Sungai Pinang, Kota Samarinda, Kalimantan Timur';
 $map_embed = $contact_section['additional_info'] ?? '<iframe class="map-iframe" src="https://www.google.com/maps/embed?pb=!4v1762266865140!6m8!1m7!1sWhc2abtYaDzUcfT_F7LnHg!2m2!1d-0.4730531793778449!2d117.1653334981797!3f326.50841155499506!4f-15.840080292808594!5f1.0886293032444474" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
-$footer_text = $contact_section['meta_data'] ?? '© 2025 King Advertising. All rights reserved.';
+$footer_text = $contact_section['meta_data'] ?? '© 2025 King Printing. All rights reserved.';
 
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -312,16 +312,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST">
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Senin - Jumat</label>
+                        <label>Senin - Sabtu</label>
                         <input type="text" name="weekdays" class="form-control" 
-                               value="<?php echo htmlspecialchars($operational_hours['weekdays']['hours_text'] ?? 'Senin - Jumat: 08.00 - 17.00'); ?>"
-                               placeholder="Contoh: Senin - Jumat: 08.00 - 17.00">
-                    </div>
-                    <div class="form-group">
-                        <label>Sabtu</label>
-                        <input type="text" name="saturday" class="form-control" 
-                               value="<?php echo htmlspecialchars($operational_hours['saturday']['hours_text'] ?? 'Sabtu: 08.00 - 15.00'); ?>"
-                               placeholder="Contoh: Sabtu: 08.00 - 15.00">
+                               value="<?php echo htmlspecialchars($operational_hours['weekdays']['hours_text'] ?? 'Senin - Sabtu: 09.00 - 18.00'); ?>"
+                               placeholder="Contoh: Senin - Sabtu: 09.00 - 18.00">
                     </div>
                     <div class="form-group">
                         <label>Minggu</label>

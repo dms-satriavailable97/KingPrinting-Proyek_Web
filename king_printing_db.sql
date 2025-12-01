@@ -77,15 +77,15 @@ CREATE TABLE website_hero_slides (
 
 -- Insert default sections
 INSERT INTO website_sections (section_name, title, subtitle, description, is_active, sort_order) VALUES 
-('hero', 'Raja di Dunia {highlight}Promosi & Advertising{/highlight}', 'Spanduk, banner, stiker, baliho, brosur, dan berbagai kebutuhan cetak lainnya dengan kualitas kerajaan dan harga terjangkau.', '', true, 1),
+('hero', 'Raja di Dunia {highlight}Promosi & Advertising{/highlight}', 'Spanduk, banner, stiker, baliho, brosur, dan berbagai kebutuhan cetak lainnya dengan kualitas Terbaik dan harga terjangkau.', '', true, 1),
 ('services', 'Layanan {highlight}Kami{/highlight}', '', '', true, 2),
-('steps', 'Cara Memesan di {highlight}King Advertising{/highlight}', '', '', true, 3),
-('features', 'Mengapa Memilih {highlight}King Advertising{/highlight}?', '', '', true, 4),
+('steps', 'Cara Memesan di {highlight}King Printing{/highlight}', '', '', true, 3),
+('features', 'Mengapa Memilih {highlight}King Printing{/highlight}?', '', '', true, 4),
 ('faq', 'Pertanyaan {highlight}Umum{/highlight}', 'Berikut adalah beberapa hal yang sering ditanyakan oleh pelanggan kami. Klik pada pertanyaan untuk melihat jawabannya.', 'Tanya Jawab', true, 5);
 
 -- Insert section contact dengan data lengkap
 INSERT INTO website_sections (section_name, title, subtitle, description, additional_info, meta_data, is_active, sort_order) VALUES 
-('contact', '+62 887-0584-4251', 'info@kingadvertising.com', 'Jl. Ahmad Yani 2 No.12 RT.10, Temindung Permai, Kec. Sungai Pinang, Kota Samarinda, Kalimantan Timur', '<iframe class="map-iframe" src="https://www.google.com/maps/embed?pb=!4v1762266865140!6m8!1m7!1sWhc2abtYaDzUcfT_F7LnHg!2m2!1d-0.4730531793778449!2d117.1653334981797!3f326.50841155499506!4f-15.840080292808594!5f1.0886293032444474" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>', '© 2025 King Advertising. All rights reserved.', true, 6);
+('contact', '+62 887-0584-4251', 'kingdprint@gmail.com', 'Jl. Ahmad Yani 2 No.12 RT.10, Temindung Permai, Kec. Sungai Pinang, Kota Samarinda, Kalimantan Timur', '<iframe class="map-iframe" src="https://www.google.com/maps/embed?pb=!4v1762266865140!6m8!1m7!1sWhc2abtYaDzUcfT_F7LnHg!2m2!1d-0.4730531793778449!2d117.1653334981797!3f326.50841155499506!4f-15.840080292808594!5f1.0886293032444474" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>', '© 2025 King Printing. All rights reserved.', true, 6);
 
 -- Insert default hero slides
 INSERT INTO website_hero_slides (image_path, title, subtitle, button_text, button_link, sort_order, is_active) VALUES 
@@ -107,7 +107,7 @@ INSERT INTO website_items (section_name, item_type, title, description, icon, so
 ('steps', 'step', 'Pilih Produk', 'Pilih produk dan klik tombol "Pesan Sekarang" untuk membuka form pemesanan.', 'fas fa-mouse-pointer', 1, true),
 ('steps', 'step', 'Isi Form', 'Lengkapi detail pesanan Anda pada form yang muncul, seperti ukuran, bahan, dan jumlah.', 'fas fa-ruler-combined', 2, true),
 ('steps', 'step', 'Kirim ke WhatsApp', 'Klik tombol kirim dan data pesanan Anda akan kami terima di sistem dan juga WhatsApp.', 'fab fa-whatsapp', 3, true),
-('steps', 'step', 'Produk Siap', 'Produk selesai dibuat, Anda dihubungi untuk proses pengambilan atau pengiriman.', 'fas fa-shipping-fast', 4, true);
+('steps', 'step', 'Produk Siap', 'Setelah pesanan selesai, kami akan menghubungi Anda untuk proses pengambilan di toko.', 'fas fa-shipping-fast', 4, true);
 
 -- Insert default features
 INSERT INTO website_items (section_name, item_type, title, description, icon, sort_order, is_active) VALUES 
@@ -122,7 +122,7 @@ INSERT INTO website_items (section_name, item_type, title, description, sort_ord
 ('faq', 'faq', 'Apakah bisa bantu buatkan desainnya?', 'Tentu saja! Kami dapat membantu dalam membuat desainnya. Silakan lampirkan detail, teks, atau sketsa kasar ide Anda pada kolom catatan saat memesan.', 2, true),
 ('faq', 'faq', 'Apakah ada minimal order?', 'Sebagian besar produk (spanduk, banner) bisa dipesan satuan. Namun untuk produk kecil seperti stiker label atau kemasan dus, mungkin ada minimum order untuk efisiensi harga.', 3, true),
 ('faq', 'faq', 'Bagaimana sistem pembayarannya?', 'Pembayaran dilakukan melalui transfer bank (BCA) atau bayar langsung di tempat.', 4, true),
-('faq', 'faq', 'Bagaimana cara mengambil pesanan yang sudah selesai?', 'Pesanan yang telah selesai akan kami konfirmasi kepada pelanggan untuk segera diambil di King Printing.', 5, true);
+('faq', 'faq', 'Bagaimana cara mengambil pesanan yang sudah selesai?', 'Pesanan yang telah selesai akan kami konfirmasi kepada pelanggan untuk segera diambil di toko.', 5, true);
 
 -- Tambah table baru untuk jam operasional
 CREATE TABLE IF NOT EXISTS operational_hours (
@@ -135,8 +135,7 @@ CREATE TABLE IF NOT EXISTS operational_hours (
 
 -- Insert default jam operasional
 INSERT INTO operational_hours (day_type, hours_text, is_open, sort_order) VALUES 
-('weekdays', 'Senin - Jumat: 08.00 - 17.00', true, 1),
-('saturday', 'Sabtu: 08.00 - 15.00', true, 2),
+('weekdays', 'Senin - Sabtu: 09.00 - 18.00', true, 1),
 ('sunday', 'Minggu: Tutup', false, 3);
 
 CREATE TABLE IF NOT EXISTS admins (
