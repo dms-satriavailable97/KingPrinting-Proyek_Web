@@ -272,6 +272,7 @@ table {
     border-collapse: collapse;
 }
 
+/* PERBAIKAN RATA TENGAH VERTIKAL DI SINI */
 th, td {
     padding: 1.2rem 1rem;
     text-align: left;
@@ -279,6 +280,7 @@ th, td {
     font-size: 0.95rem;
     font-weight: 500;
     color: var(--text-primary);
+    vertical-align: middle; /* Menjaga semua isi sel tetap sejajar di tengah vertikal */
 }
 
 th {
@@ -300,6 +302,7 @@ td:first-child {
     border: 1px solid currentColor;
     font-size: 0.8rem;
     text-transform: capitalize;
+    display: inline-block; /* Memastikan status tetap rapi */
 }
 
 .status.active {
@@ -339,7 +342,7 @@ td:first-child {
     border-color: var(--brand-dark-red);
 }
 
-/* Status Pesanan (Disederhanakan) */
+/* Status Pesanan */
 .status.tertunda {
     background-color: rgba(255, 199, 0, 0.2); /* Kuning */
     color: #b38f00;
@@ -354,6 +357,12 @@ td:first-child {
     color: var(--status-active-text);
 }
 
+/* PERBAIKAN CELL AKSI DI SINI */
+/* Hapus display:flex pada td agar tabel render dengan benar */
+.action-cell {
+    white-space: nowrap; /* Mencegah tombol turun baris */
+}
+
 /* Tombol Aksi */
 .action-btn {
     padding: 0.4rem 0.8rem;
@@ -364,7 +373,18 @@ td:first-child {
     cursor: pointer;
     transition: all 0.2s ease;
     color: white;
+    display: inline-flex; /* Menggantikan flex pada parent */
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem; /* Jarak antar tombol manual */
+    vertical-align: middle;
 }
+
+/* Menghapus margin pada tombol terakhir */
+.action-cell .action-btn:last-child {
+    margin-right: 0;
+}
+
 .action-btn.process {
     background-color: #4299e1; /* Biru */
 }
@@ -382,6 +402,17 @@ td:first-child {
 }
 .action-btn.detail:hover {
     background-color: #666666;
+}
+.action-btn.delete { 
+    background-color: #e74c3c; 
+    padding: 0.4rem 0.7rem;
+}
+.action-btn.delete:hover { 
+    background-color: #c0392b; 
+}
+.action-btn.delete i { 
+    color: white; 
+    font-size: 0.8rem; 
 }
 
 /* Ikon sidebar */
@@ -409,10 +440,7 @@ td:first-child {
     border-radius: 8px;
     width: 90%;
     max-width: 450px; /* Lebar modal */
-
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-
-
     position: absolute;
     top: 50%;
     left: 50%;

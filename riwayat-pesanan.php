@@ -6,22 +6,25 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 require_once 'config.php';
 
+// === FILTER DATE ===
+$filter_date = isset($_GET['date']) && !empty($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+
 // === KONFIGURASI PAGINATION ===
-$limit = 10; // Jumlah data per halaman
+$limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) $page = 1;
 $offset = ($page - 1) * $limit;
 
-// 1. Hitung Total Data (Status Selesai)
-$sql_count = "SELECT COUNT(*) as total FROM pesanan WHERE status = 'Selesai'";
+// 1. Hitung Total Data
+$sql_count = "SELECT COUNT(*) as total FROM pesanan WHERE status = 'Selesai' AND DATE(tanggal_masuk) = '$filter_date'";
 $result_count = $conn->query($sql_count);
 $total_data = $result_count->fetch_assoc()['total'];
 $total_pages = ceil($total_data / $limit);
 
-// 2. Ambil Data dengan Limit & Offset
+// 2. Ambil Data
 $sql = "SELECT id, nama_pemesan, produk, tanggal_masuk, status 
         FROM pesanan 
-        WHERE status = 'Selesai' 
+        WHERE status = 'Selesai' AND DATE(tanggal_masuk) = '$filter_date'
         ORDER BY tanggal_masuk DESC 
         LIMIT $limit OFFSET $offset";
 $result = $conn->query($sql);
@@ -36,75 +39,84 @@ $result = $conn->query($sql);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
     <style>
-        /* === MODAL CENTERED FIX === */
-        .custom-modal { 
-            display: none; 
-            position: fixed; 
-            z-index: 1001; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            height: 100%; 
-            overflow: hidden; 
-            background-color: rgba(0,0,0,0.6); 
-            backdrop-filter: blur(5px); 
+        /* === CSS DISAMAKAN DENGAN pesanan.php === */
+        
+        /* Filter Header Styles */
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        .header-title h3 { margin: 0; font-size: 1.3rem; color: #333; font-weight: 600; }
+        .header-subtitle { font-size: 0.9rem; color: #888; margin-top: 4px; }
+
+        /* Tombol Kalender */
+        .date-picker-wrapper {
+            position: relative;
+            width: 42px;
+            height: 40px;
+            background-color: #9a2020;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 2px 5px rgba(154, 32, 32, 0.2);
+        }
+        .date-picker-wrapper:hover { background-color: #7a1a1a; }
+        .date-icon { color: white; font-size: 1.2rem; pointer-events: none; }
+        .invisible-date-input {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; cursor: pointer; z-index: 10;
+        }
+        .invisible-date-input::-webkit-calendar-picker-indicator {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            padding: 0; margin: 0; cursor: pointer; opacity: 0;
         }
 
-        .custom-modal-content { 
-            background-color: #fefefe; 
-            padding: 25px 35px; 
-            border-radius: 15px; 
-            width: 90%; 
-            
-            /* POSISI FIXED DI TENGAH */
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            margin: 0;
-            
-            max-height: 90vh;
-            overflow-y: auto;
-            
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
-            animation: fadein 0.3s ease-out; 
+        /* Table & Buttons Styles (PERSIS pesanan.php) */
+        table td, table th { vertical-align: middle !important; }
+        .action-cell { white-space: nowrap; }
+        
+        /* Ini style tombol delete yang sudah disesuaikan agar tidak mengecil/membesar aneh */
+        .action-btn.delete { 
+            background-color: #e74c3c !important; 
+            color: white !important; 
+            padding: 0.4rem 0.7rem; 
+            border-radius: 5px; 
+            border: none; 
+            cursor: pointer; 
+            margin-left: 10px; 
+            transition: 0.2s; 
         }
+        /* Tidak ada override font-size icon di sini agar ikut dashboard.css (0.8rem) */
 
-        @keyframes fadein { 
-            from { opacity: 0; transform: translate(-50%, -55%); } 
-            to { opacity: 1; transform: translate(-50%, -50%); } 
-        }
+        /* Modal Styles */
+        .custom-modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
+        .custom-modal-content { background-color: #fefefe; padding: 25px 35px; border-radius: 15px; width: 90%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; max-height: 90vh; overflow-y: auto; animation: fadein 0.3s ease-out; }
+        @keyframes fadein { from { opacity: 0; transform: translate(-50%, -55%); } to { opacity: 1; transform: translate(-50%, -50%); } }
         
         .detail-modal-content { max-width: 600px; }
         .detail-modal-header { padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .detail-modal-header h2 { margin: 0; font-size: 1.6rem; color: var(--brand-dark-red); }
-        .close-modal { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.2s; }
-        .close-modal:hover { color: #333; }
-
+        .detail-modal-header h2 { margin: 0; font-size: 1.6rem; color: #9a2020; }
+        .close-modal { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
         .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 25px; }
-        .detail-item { font-size: 0.95rem; }
         .detail-item strong { display: block; color: #888; font-weight: 500; margin-bottom: 4px; font-size: 0.85rem; }
-        .detail-item span { color: var(--text-primary); font-weight: 500; }
+        .detail-item span { color: #333; font-weight: 500; }
         .detail-item.full-width { grid-column: 1 / -1; }
         .detail-item textarea { width: 100%; height: 100px; background: #f9f9f9; border: 1px solid #eee; border-radius: 5px; padding: 10px; font-family: 'Poppins', sans-serif; resize: vertical; }
-
+        
         .confirm-modal-content { max-width: 420px; text-align: center; }
-        .confirm-icon { font-size: 3.5rem; color: #e74c3c; margin-bottom: 1rem; }
-        .confirm-modal-content h3 { font-size: 1.5rem; color: #333; margin-bottom: 0.5rem; }
-        .confirm-modal-content p { color: #666; margin-bottom: 1.5rem; line-height: 1.5; }
         .confirm-actions { display: flex; justify-content: center; gap: 1rem; }
         
-        .action-cell { display: flex; gap: 0.8rem; align-items: center; justify-content: flex-start; }
-        .action-btn.delete { background-color: #e74c3c; padding: 0.4rem 0.7rem; }
-        .action-btn.delete:hover { background-color: #c0392b; }
-        .action-btn.delete i { color: white; font-size: 0.8rem; }
-        #historyTable th:last-child { text-align: left; }
-
-        /* Pagination Style */
-        .pagination { display: flex; justify-content: center; margin-top: 20px; gap: 5px; }
-        .pagination a { padding: 8px 12px; border: 1px solid #ddd; color: #333; text-decoration: none; border-radius: 5px; transition: 0.3s; }
+        .pagination { display: flex; justify-content: center; margin-top: 20px; gap: 5px; align-items: center; }
+        .pagination a { padding: 8px 12px; border: 1px solid #ddd; color: #333; text-decoration: none; border-radius: 5px; }
         .pagination a.active { background-color: #9a2020; color: white; border-color: #9a2020; }
-        .pagination a:hover:not(.active) { background-color: #f0f0f0; }
+        .pagination span.dots { padding: 0 5px; color: #888; }
     </style>
 </head>
 <body>
@@ -136,8 +148,29 @@ $result = $conn->query($sql);
             
             <section class="customers-table">
                 <div class="table-header">
-                    <h3>Semua Pesanan yang Telah Selesai (Total: <?php echo $total_data; ?>)</h3>
+                    <div class="header-title">
+                        <h3>
+                            <?php 
+                            if($filter_date == date('Y-m-d')) {
+                                echo "Riwayat Selesai Hari Ini";
+                            } else {
+                                echo "Riwayat Selesai " . date('d M Y', strtotime($filter_date));
+                            }
+                            ?>
+                        </h3>
+                        <div class="header-subtitle">Total Data: <?php echo $total_data; ?></div>
+                    </div>
+
+                    <form id="filterForm" method="GET">
+                        <div class="date-picker-wrapper" title="Pilih Tanggal">
+                            <i class="fas fa-calendar-alt date-icon"></i>
+                            <input type="date" name="date" class="invisible-date-input" 
+                                   value="<?php echo $filter_date; ?>" 
+                                   onchange="document.getElementById('filterForm').submit()">
+                        </div>
+                    </form>
                 </div>
+
                 <table id="historyTable">
                     <thead>
                         <tr>
@@ -166,37 +199,35 @@ $result = $conn->query($sql);
                                 echo "</tr>";
                             }
                         } else {
-                            echo "<tr><td colspan='6' style='text-align:center; padding: 2rem;'>Belum ada riwayat pesanan yang selesai.</td></tr>";
+                            echo "<tr><td colspan='6' style='text-align:center; padding: 2rem;'>Belum ada riwayat pesanan selesai pada tanggal ini.</td></tr>";
                         }
                         $conn->close();
                         ?>
                     </tbody>
                 </table>
 
-                <!-- Pagination Links -->
                 <?php if ($total_pages > 1): ?>
                 <div class="pagination">
-                    <?php if ($page > 1): ?>
-                        <a href="?page=<?php echo $page - 1; ?>">&laquo; Prev</a>
-                    <?php endif; ?>
-
-                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                        <a href="?page=<?php echo $i; ?>" class="<?php echo ($i == $page) ? 'active' : ''; ?>">
-                            <?php echo $i; ?>
-                        </a>
-                    <?php endfor; ?>
-
-                    <?php if ($page < $total_pages): ?>
-                        <a href="?page=<?php echo $page + 1; ?>">Next &raquo;</a>
-                    <?php endif; ?>
+                    <?php
+                    $queryParams = $_GET;
+                    unset($queryParams['page']);
+                    $queryString = http_build_query($queryParams);
+                    $range = 2;
+                    $start = max(1, $page - $range);
+                    $end   = min($total_pages, $page + $range);
+                    ?>
+                    <?php if ($page > 1): ?><a href="?page=<?php echo $page - 1; ?>&<?php echo $queryString; ?>">&laquo; Prev</a><?php endif; ?>
+                    <?php if ($start > 1): ?><a href="?page=1&<?php echo $queryString; ?>">1</a><?php if ($start > 2): ?><span class="dots">...</span><?php endif; ?><?php endif; ?>
+                    <?php for ($i = $start; $i <= $end; $i++): ?><a href="?page=<?php echo $i; ?>&<?php echo $queryString; ?>" class="<?php echo ($i == $page) ? 'active' : ''; ?>"><?php echo $i; ?></a><?php endfor; ?>
+                    <?php if ($end < $total_pages): ?><?php if ($end < $total_pages - 1): ?><span class="dots">...</span><?php endif; ?><a href="?page=<?php echo $total_pages; ?>&<?php echo $queryString; ?>"><?php echo $total_pages; ?></a><?php endif; ?>
+                    <?php if ($page < $total_pages): ?><a href="?page=<?php echo $page + 1; ?>&<?php echo $queryString; ?>">Next &raquo;</a><?php endif; ?>
                 </div>
                 <?php endif; ?>
-
             </section>
         </main>
     </div>
 
-    <!-- Modal Detail & Delete -->
+    <!-- Modal Details & Delete -->
     <div id="detailModal" class="custom-modal">
         <div class="custom-modal-content detail-modal-content">
             <div class="detail-modal-header">
@@ -211,7 +242,7 @@ $result = $conn->query($sql);
         <div class="custom-modal-content confirm-modal-content">
             <div class="confirm-icon"><i class="fas fa-exclamation-triangle"></i></div>
             <h3>Konfirmasi Hapus</h3>
-            <p>Anda yakin ingin menghapus riwayat pesanan ini secara permanen? Tindakan ini tidak dapat dibatalkan.</p>
+            <p>Anda yakin ingin menghapus riwayat pesanan ini secara permanen?</p>
             <div class="confirm-actions">
                 <button id="confirmDeleteBtn" class="action-btn delete">Ya, Hapus</button>
                 <button id="cancelDeleteBtn" class="action-btn detail">Batal</button>
@@ -229,7 +260,6 @@ $result = $conn->query($sql);
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         let orderIdToDelete = null;
 
-        // Search Client-side (Halaman Aktif)
         const searchInput = document.getElementById('searchInput');
         const tableRows = document.querySelectorAll('#historyTable tbody tr');
         if (searchInput) {
@@ -249,24 +279,16 @@ $result = $conn->query($sql);
             });
         }
 
-        // Delete Function
         function executeDelete(orderId) {
             const formData = new FormData();
             formData.append('id', orderId);
             fetch('delete-order.php', { method: 'POST', body: formData })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    window.location.reload(); // Refresh untuk pagination
-                } else {
-                    alert('Gagal menghapus: ' + data.message);
-                }
+                if (data.success) window.location.reload();
+                else alert('Gagal menghapus: ' + data.message);
             })
-            .catch(() => alert('Terjadi kesalahan jaringan saat menghapus.'))
-            .finally(() => {
-                confirmDeleteModal.style.display = 'none';
-                orderIdToDelete = null;
-            });
+            .catch(() => alert('Terjadi kesalahan jaringan saat menghapus.'));
         }
 
         if(table) {
@@ -283,8 +305,7 @@ $result = $conn->query($sql);
                             if(data.success) {
                                 const order = data.order;
                                 document.getElementById('detailModalTitle').textContent = `Detail Pesanan #${order.id_formatted}`;
-                                const body = document.getElementById('detailModalBody');
-                                body.innerHTML = `
+                                document.getElementById('detailModalBody').innerHTML = `
                                     <div class="detail-item"><strong>Nama Pemesan</strong><span>${order.nama_pemesan}</span></div>
                                     <div class="detail-item"><strong>Telepon</strong><span>${order.telepon}</span></div>
                                     <div class="detail-item"><strong>Produk</strong><span>${order.produk}</span></div>
@@ -296,11 +317,8 @@ $result = $conn->query($sql);
                                     <div class="detail-item full-width"><strong>Catatan</strong><textarea readonly>${order.catatan || 'Tidak ada catatan.'}</textarea></div>
                                 `;
                                 detailModal.style.display = 'block';
-                            } else {
-                                alert('Gagal memuat detail: ' + data.message);
                             }
-                        })
-                        .catch(error => alert('Terjadi kesalahan jaringan.'));
+                        });
                     }
                 }
 
