@@ -3,7 +3,7 @@ require_once 'config.php';
 
 // --- KONFIGURASI ---
 $total_target = 15;      // Target 15 data
-$status_target = 'Tertunda'; // Status fixed
+$status_target = 'Selesai'; // Status fixed
 $date_target = date('Y-m-d'); // Tanggal hari ini
 
 // --- DATA DUMMY (Variasi Data) ---

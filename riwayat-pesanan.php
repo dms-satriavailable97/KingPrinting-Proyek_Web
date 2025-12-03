@@ -13,13 +13,29 @@ $filter_date = isset($_GET['date']) && !empty($_GET['date']) ? $_GET['date'] : d
 $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) $page = 1;
-$offset = ($page - 1) * $limit;
 
 // 1. Hitung Total Data
 $sql_count = "SELECT COUNT(*) as total FROM pesanan WHERE status = 'Selesai' AND DATE(tanggal_masuk) = '$filter_date'";
 $result_count = $conn->query($sql_count);
 $total_data = $result_count->fetch_assoc()['total'];
 $total_pages = ceil($total_data / $limit);
+
+// === PERBAIKAN PAGINATION REDIRECT (SAMA SEPERTI PESANAN.PHP) ===
+// Jika halaman saat ini lebih besar dari total halaman yang ada (dan total data > 0)
+if ($page > $total_pages && $total_pages > 0) {
+    $queryParams = $_GET;
+    $queryParams['page'] = $total_pages;
+    $newQueryString = http_build_query($queryParams);
+    
+    header("Location: ?" . $newQueryString);
+    exit;
+}
+// Jika total data 0, reset ke page 1
+if ($total_pages == 0) {
+    $page = 1;
+}
+
+$offset = ($page - 1) * $limit;
 
 // 2. Ambil Data
 $sql = "SELECT id, nama_pemesan, produk, tanggal_masuk, status 

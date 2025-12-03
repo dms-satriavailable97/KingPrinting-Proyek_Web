@@ -10,13 +10,12 @@ require_once 'config.php';
 $filter_date = isset($_GET['date']) && !empty($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $filter_status = isset($_GET['status_filter']) && !empty($_GET['status_filter']) ? $_GET['status_filter'] : 'all';
 
-// === PAGINATION ===
+// === PAGINATION CONFIG ===
 $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) $page = 1;
-$offset = ($page - 1) * $limit;
 
-// === QUERY ===
+// === QUERY WHERE CLAUSE ===
 $where_clauses = ["DATE(tanggal_masuk) = '$filter_date'"];
 
 if ($filter_status === 'Tertunda') $where_clauses[] = "status = 'Tertunda'";
@@ -25,11 +24,30 @@ elseif ($filter_status === 'all') $where_clauses[] = "status IN ('Tertunda', 'Pr
 
 $where_sql = implode(' AND ', $where_clauses);
 
-// Hitung Total
+// Hitung Total Data
 $sql_count = "SELECT COUNT(*) as total FROM pesanan WHERE $where_sql";
 $result_count = $conn->query($sql_count);
 $total_data = $result_count->fetch_assoc()['total'];
 $total_pages = ceil($total_data / $limit);
+
+// === PERBAIKAN PAGINATION REDIRECT ===
+// Jika halaman saat ini lebih besar dari total halaman yang ada (dan total data > 0)
+// Redirect ke halaman terakhir yang valid
+if ($page > $total_pages && $total_pages > 0) {
+    // Bangun ulang query string agar filter tetap terbawa
+    $queryParams = $_GET;
+    $queryParams['page'] = $total_pages;
+    $newQueryString = http_build_query($queryParams);
+    
+    header("Location: ?" . $newQueryString);
+    exit;
+}
+// Jika total data 0, maka paksa page ke 1 (opsional, tapi bagus untuk UX)
+if ($total_pages == 0) {
+    $page = 1;
+}
+
+$offset = ($page - 1) * $limit;
 
 // Ambil Data
 $sql = "SELECT id, nama_pemesan, produk, tanggal_masuk, status, telepon, ukuran, bahan, jumlah, catatan 
