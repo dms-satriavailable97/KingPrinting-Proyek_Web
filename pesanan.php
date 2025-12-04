@@ -165,7 +165,7 @@ $result = $conn->query($sql);
                             }
                             ?>
                         </h3>
-                        <div class="header-subtitle">Total Data: <?php echo $total_data; ?></div>
+                        <div class="header-subtitle">Total Pesanan: <?php echo $total_data; ?></div>
                     </div>
                     
                     <form id="filterForm" method="GET" class="filter-group">
