@@ -30,19 +30,14 @@ $result_count = $conn->query($sql_count);
 $total_data = $result_count->fetch_assoc()['total'];
 $total_pages = ceil($total_data / $limit);
 
-// === PERBAIKAN PAGINATION REDIRECT ===
-// Jika halaman saat ini lebih besar dari total halaman yang ada (dan total data > 0)
-// Redirect ke halaman terakhir yang valid
+// === PAGINATION REDIRECT ===
 if ($page > $total_pages && $total_pages > 0) {
-    // Bangun ulang query string agar filter tetap terbawa
     $queryParams = $_GET;
     $queryParams['page'] = $total_pages;
     $newQueryString = http_build_query($queryParams);
-    
     header("Location: ?" . $newQueryString);
     exit;
 }
-// Jika total data 0, maka paksa page ke 1 (opsional, tapi bagus untuk UX)
 if ($total_pages == 0) {
     $page = 1;
 }
@@ -53,7 +48,7 @@ $offset = ($page - 1) * $limit;
 $sql = "SELECT id, nama_pemesan, produk, tanggal_masuk, status, telepon, ukuran, bahan, jumlah, catatan 
         FROM pesanan 
         WHERE $where_sql 
-        ORDER BY FIELD(status, 'Proses', 'Tertunda'), tanggal_masuk DESC 
+        ORDER BY tanggal_masuk DESC 
         LIMIT $limit OFFSET $offset";
 $result = $conn->query($sql);
 ?>
@@ -67,99 +62,30 @@ $result = $conn->query($sql);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
     <style>
-        /* === FILTER STYLES === */
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eee;
-        }
+        /* Style tambahan */
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
         .header-title h3 { margin: 0; font-size: 1.3rem; color: #333; font-weight: 600; }
         .header-subtitle { font-size: 0.9rem; color: #888; margin-top: 4px; }
         
-        .filter-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        /* Select Box */
-        .custom-select {
-            padding: 0 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background-color: #fff;
-            font-family: 'Poppins', sans-serif;
-            color: #555;
-            cursor: pointer;
-            font-size: 0.9rem;
-            height: 40px; /* Tinggi disamakan */
-            outline: none;
-        }
+        .filter-group { display: flex; gap: 10px; align-items: center; }
+        .custom-select { padding: 0 15px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #fff; font-family: 'Poppins', sans-serif; color: #555; cursor: pointer; font-size: 0.9rem; height: 40px; outline: none; }
         .custom-select:hover { border-color: #bbb; }
 
-        /* === TOMBOL LOGO TANGGAL (KOTAK MERAH) === */
-        .date-picker-wrapper {
-            position: relative;
-            width: 42px;  /* Lebar kotak */
-            height: 40px; /* Tinggi kotak (sama dengan select) */
-            background-color: #9a2020;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.3s;
-            box-shadow: 0 2px 5px rgba(154, 32, 32, 0.2);
-        }
+        .date-picker-wrapper { position: relative; width: 42px; height: 40px; background-color: #9a2020; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.3s; box-shadow: 0 2px 5px rgba(154, 32, 32, 0.2); }
+        .date-picker-wrapper:hover { background-color: #7a1a1a; }
+        .date-icon { color: white; font-size: 1.2rem; pointer-events: none; }
+        .invisible-date-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10; }
+        .invisible-date-input::-webkit-calendar-picker-indicator { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 0; margin: 0; cursor: pointer; opacity: 0; }
 
-        .date-picker-wrapper:hover {
-            background-color: #7a1a1a;
-        }
-
-        .date-icon {
-            color: white;
-            font-size: 1.2rem;
-            pointer-events: none; /* Agar klik tembus ke input */
-        }
-
-        /* Input Transparan yang Menutupi Tombol */
-        .invisible-date-input {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0; /* Benar-benar tidak terlihat */
-            cursor: pointer;
-            z-index: 10;
-        }
-
-        /* Trik agar area klik picker memenuhi seluruh kotak di Chrome/Edge */
-        .invisible-date-input::-webkit-calendar-picker-indicator {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            padding: 0;
-            margin: 0;
-            cursor: pointer;
-            opacity: 0;
-        }
-
-        /* --- STYLE BAWAAN --- */
-        table td, table th { vertical-align: middle !important; }
-        .action-cell { white-space: nowrap; }
-        .action-btn.delete { background-color: #e74c3c !important; color: white !important; padding: 0.4rem 0.7rem; border-radius: 5px; border: none; cursor: pointer; margin-left: 10px; transition: 0.2s; }
+        /* Dropdown Status */
         .status-wrapper { position: relative; display: inline-block; }
         .status.interactive { cursor: pointer; transition: opacity 0.2s; }
         .status.interactive:hover { opacity: 0.8; }
         .status-dropdown { display: none; position: absolute; top: 100%; left: 0; background-color: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 120px; list-style: none; padding: 5px 0; z-index: 10; margin-top: 5px; }
         .status-dropdown li { padding: 8px 15px; font-size: 0.9rem; cursor: pointer; }
         .status-dropdown li:hover { background-color: #f5f5f5; }
+
+        /* Modal Styles */
         .custom-modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
         .custom-modal-content { background-color: #fefefe; padding: 25px 35px; border-radius: 15px; width: 90%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-height: 90vh; overflow-y: auto; animation: fadein 0.3s ease-out; }
         @keyframes fadein { from { opacity: 0; transform: translate(-50%, -55%); } to { opacity: 1; transform: translate(-50%, -50%); } }
@@ -174,6 +100,8 @@ $result = $conn->query($sql);
         .detail-item textarea { width: 100%; height: 100px; background: #f9f9f9; border: 1px solid #eee; border-radius: 5px; padding: 10px; resize: vertical; font-family: 'Poppins', sans-serif; }
         .confirm-modal-content { max-width: 420px; text-align: center; }
         .confirm-actions { display: flex; justify-content: center; gap: 1rem; }
+        
+        /* Pagination */
         .pagination { display: flex; justify-content: center; margin-top: 20px; gap: 5px; align-items: center; }
         .pagination a { padding: 8px 12px; border: 1px solid #ddd; color: #333; text-decoration: none; border-radius: 5px; }
         .pagination a.active { background-color: #9a2020; color: white; border-color: #9a2020; }
@@ -209,7 +137,6 @@ $result = $conn->query($sql);
             
             <section class="customers-table">
                 <div class="table-header">
-                    <!-- Judul Dinamis -->
                     <div class="header-title">
                         <h3>
                             <?php 
@@ -224,19 +151,14 @@ $result = $conn->query($sql);
                     </div>
                     
                     <form id="filterForm" method="GET" class="filter-group">
-                        <!-- Status Filter -->
                         <select name="status_filter" class="custom-select" onchange="document.getElementById('filterForm').submit()">
                             <option value="all" <?php echo $filter_status == 'all' ? 'selected' : ''; ?>>Semua Status</option>
                             <option value="Tertunda" <?php echo $filter_status == 'Tertunda' ? 'selected' : ''; ?>>Tertunda</option>
                             <option value="Proses" <?php echo $filter_status == 'Proses' ? 'selected' : ''; ?>>Proses</option>
                         </select>
 
-                        <!-- TOMBOL LOGO TANGGAL -->
-                        <!-- Visual: Hanya Ikon -->
                         <div class="date-picker-wrapper" title="Pilih Tanggal">
                             <i class="fas fa-calendar-alt date-icon"></i>
-                            
-                            <!-- Fungsional: Input Transparan -->
                             <input type="date" name="date" class="invisible-date-input" 
                                    value="<?php echo $filter_date; ?>" 
                                    onchange="document.getElementById('filterForm').submit()">
@@ -261,10 +183,14 @@ $result = $conn->query($sql);
                             while($row = $result->fetch_assoc()) {
                                 $status = htmlspecialchars($row['status']);
                                 $status_class = strtolower($status);
+                                
+                                $nama_aman = htmlspecialchars($row['nama_pemesan']);
+                                $produk_aman = htmlspecialchars($row['produk']);
+
                                 echo "<tr data-id='" . $row['id'] . "'>";
                                 echo "<td>#KP" . str_pad($row['id'], 3, '0', STR_PAD_LEFT) . "</td>";
-                                echo "<td>" . htmlspecialchars($row['nama_pemesan']) . "</td>";
-                                echo "<td>" . htmlspecialchars($row['produk']) . "</td>";
+                                echo "<td title='$nama_aman'>" . $nama_aman . "</td>";
+                                echo "<td title='$produk_aman'>" . $produk_aman . "</td>";
                                 echo "<td>" . date('d M Y, H:i', strtotime($row['tanggal_masuk'])) . "</td>";
                                 echo "<td>
                                         <div class='status-wrapper'>
@@ -311,7 +237,7 @@ $result = $conn->query($sql);
         </main>
     </div>
 
-    <!-- Modal & JS (Sama) -->
+    <!-- Modal & JS -->
     <div id="detailModal" class="custom-modal">
         <div class="custom-modal-content detail-modal-content">
             <div class="detail-modal-header">
@@ -343,9 +269,15 @@ $result = $conn->query($sql);
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         let activeDropdown = null;
         let orderIdToDelete = null;
+        let rowToDelete = null; 
 
         const searchInput = document.getElementById('searchInput');
         const tableRows = document.querySelectorAll('#ordersTable tbody tr');
+        
+        // === Ambil Filter yang sedang Aktif ===
+        const filterSelect = document.querySelector('select[name="status_filter"]');
+        const currentFilter = filterSelect ? filterSelect.value : 'all'; // 'all', 'Tertunda', 'Proses'
+
         if (searchInput) {
             searchInput.addEventListener('keyup', function() {
                 const searchTerm = this.value.toLowerCase().trim();
@@ -362,15 +294,71 @@ $result = $conn->query($sql);
 
         function updateOrderStatus(orderId, newStatus, statusElement) {
             const originalStatus = statusElement.textContent;
-            statusElement.textContent = '...';
+            statusElement.style.opacity = '0.5';
+
             const formData = new FormData();
             formData.append('id', orderId);
             formData.append('status', newStatus);
+            
             fetch('update-status.php', { method: 'POST', body: formData })
             .then(response => response.json())
             .then(data => {
-                if (data.success) window.location.reload();
-                else { alert('Gagal: ' + data.message); statusElement.textContent = originalStatus; }
+                statusElement.style.opacity = '1';
+                
+                if (data.success) {
+                    // === LOGIKA CERDAS PENGHAPUSAN BARIS (Tanpa Reload) ===
+                    let shouldRemove = false;
+
+                    // 1. Jika status jadi "Selesai", HAPUS (karena ini tabel Active Orders)
+                    if (newStatus === 'Selesai') {
+                        shouldRemove = true;
+                    }
+                    // 2. Jika Filter bukan "Semua", dan status baru TIDAK sama dengan filter
+                    // Contoh: Filter "Tertunda", ubah jadi "Proses" -> Hapus
+                    else if (currentFilter !== 'all' && currentFilter !== newStatus) {
+                        shouldRemove = true;
+                    }
+
+                    if (shouldRemove) {
+                        // Ambil baris tabel
+                        const row = statusElement.closest('tr');
+                        if(row) {
+                            // Efek fade out
+                            row.style.transition = 'opacity 0.5s';
+                            row.style.opacity = '0';
+                            
+                            // Hapus setelah 0.5 detik
+                            setTimeout(() => {
+                                row.remove();
+                                // Opsional: Cek jika tabel kosong
+                                const tbody = document.querySelector('#ordersTable tbody');
+                                if (tbody && tbody.rows.length === 0) {
+                                    tbody.innerHTML = `<tr><td colspan='6' style='text-align:center; padding: 3rem; color: #888;'><i class='fas fa-box-open' style='font-size: 2.5rem; margin-bottom: 15px; color: #ddd; display:block;'></i>Tidak ada pesanan untuk filter ini.</td></tr>`;
+                                }
+                            }, 500);
+                        }
+                    } else {
+                        // HANYA UPDATE TAMPILAN (Jika tidak dihapus)
+                        statusElement.textContent = newStatus;
+                        statusElement.classList.remove('tertunda', 'proses', 'selesai', 'completed');
+                        statusElement.classList.add(newStatus.toLowerCase());
+                        statusElement.setAttribute('data-current-status', newStatus);
+                    }
+                    
+                    if (activeDropdown) {
+                        activeDropdown.style.display = 'none';
+                        activeDropdown = null;
+                    }
+                }
+                else { 
+                    alert('Gagal: ' + data.message); 
+                    statusElement.textContent = originalStatus; 
+                }
+            })
+            .catch(err => {
+                statusElement.style.opacity = '1';
+                statusElement.textContent = originalStatus;
+                alert('Terjadi kesalahan jaringan.');
             });
         }
 
@@ -380,7 +368,14 @@ $result = $conn->query($sql);
             fetch('delete-order.php', { method: 'POST', body: formData })
             .then(response => response.json())
             .then(data => {
-                if (data.success) window.location.reload();
+                if (data.success) {
+                    confirmDeleteModal.style.display = 'none';
+                    if (rowToDelete) {
+                        rowToDelete.style.transition = 'opacity 0.5s';
+                        rowToDelete.style.opacity = '0';
+                        setTimeout(() => rowToDelete.remove(), 500);
+                    }
+                }
                 else alert('Gagal menghapus: ' + data.message);
             });
         }
@@ -394,9 +389,7 @@ $result = $conn->query($sql);
 
                 if (statusTrigger) {
                     const dropdown = statusTrigger.nextElementSibling;
-                    
-                    // === LOGIKA ISI DROPDOWN DITAMBAHKAN DISINI ===
-                    const currentStatus = statusTrigger.dataset.currentStatus;
+                    const currentStatus = statusTrigger.getAttribute('data-current-status');
                     let options = '';
 
                     if (currentStatus === 'Tertunda') {
@@ -406,17 +399,18 @@ $result = $conn->query($sql);
                     }
                     
                     dropdown.innerHTML = options;
-                    // === SELESAI LOGIKA ===
-
+                    
                     if (activeDropdown && activeDropdown !== dropdown) activeDropdown.style.display = 'none';
                     dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
                     activeDropdown = (dropdown.style.display === 'block') ? dropdown : null;
-                } else if (dropdownItem) {
+                } 
+                else if (dropdownItem) {
                     const newStatus = dropdownItem.dataset.newStatus;
                     const statusElement = dropdownItem.closest('.status-wrapper').querySelector('.status.interactive');
                     const orderId = dropdownItem.closest('tr').dataset.id;
                     updateOrderStatus(orderId, newStatus, statusElement);
-                } else if (detailButton) {
+                } 
+                else if (detailButton) {
                     const orderId = detailButton.closest('tr').getAttribute('data-id');
                     fetch(`get-order-details.php?id=${orderId}`).then(r => r.json()).then(data => {
                         if(data.success) {
@@ -435,8 +429,10 @@ $result = $conn->query($sql);
                             detailModal.style.display = 'block';
                         }
                     });
-                } else if (deleteButton) {
-                    orderIdToDelete = deleteButton.closest('tr').getAttribute('data-id');
+                } 
+                else if (deleteButton) {
+                    rowToDelete = deleteButton.closest('tr');
+                    orderIdToDelete = rowToDelete.getAttribute('data-id');
                     confirmDeleteModal.style.display = 'block';
                 }
             });

@@ -1,5 +1,5 @@
 :root {
-    /* Palet Warna Baru (diadaptasi dari landing page) */
+    /* Palet Warna */
     --bg-main: #F5F5F5;
     --bg-sidebar: #FFFFFF;
     --brand-dark-red: #9a2020;
@@ -87,14 +87,12 @@ body {
     text-align: center;
 }
 
-/* Style Active tetap merah solid */
 .sidebar-nav li a.active {
     background-color: var(--brand-dark-red);
     color: white;
     transform: translateX(5px);
 }
 
-/* Style Hover menu lain (selain active) mengikuti style logout (merah transparan) */
 .sidebar-nav li a:hover:not(.active) {
     background-color: var(--status-inactive-bg);
     color: var(--status-inactive-text);
@@ -103,7 +101,6 @@ body {
 
 .sidebar-footer {
     margin-top: auto;
-    
 }
 
 .logout-btn {
@@ -230,14 +227,6 @@ body {
     font-weight: 500;
 }
 
-.card-info span i.fa-arrow-down {
-    color: var(--status-inactive-text);
-}
-.card-info span.down {
-    color: var(--status-inactive-text);
-}
-
-
 /* --- Customers Table --- */
 .customers-table {
     background-color: #fff;
@@ -267,12 +256,21 @@ body {
     font-size: 0.9rem;
 }
 
+/* === TABEL UTAMA (Fixed Layout) === */
 table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed; /* Mengunci lebar kolom */
 }
 
-/* PERBAIKAN RATA TENGAH VERTIKAL DI SINI */
+/* Lebar Kolom Proporsional */
+table th:nth-child(1) { width: 12%; } /* ID */
+table th:nth-child(2) { width: 23%; } /* Nama */
+table th:nth-child(3) { width: 20%; } /* Produk */
+table th:nth-child(4) { width: 18%; } /* Tanggal */
+table th:nth-child(5) { width: 15%; } /* Status */
+table th:nth-child(6) { width: 12%; } /* Aksi */
+
 th, td {
     padding: 1.2rem 1rem;
     text-align: left;
@@ -280,7 +278,21 @@ th, td {
     font-size: 0.95rem;
     font-weight: 500;
     color: var(--text-primary);
-    vertical-align: middle; /* Menjaga semua isi sel tetap sejajar di tengah vertikal */
+    vertical-align: middle;
+}
+
+/* Ellipsis untuk Nama & Produk di Tabel */
+table td:nth-child(2), 
+table td:nth-child(3) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Pastikan Dropdown Status Tidak Terpotong */
+table td:nth-child(5),
+table td:nth-child(6) {
+    overflow: visible; 
 }
 
 th {
@@ -302,17 +314,29 @@ td:first-child {
     border: 1px solid currentColor;
     font-size: 0.8rem;
     text-transform: capitalize;
-    display: inline-block; /* Memastikan status tetap rapi */
+    display: inline-block;
 }
 
 .status.active {
     background-color: var(--status-active-bg);
     color: var(--status-active-text);
 }
-
 .status.inactive {
     background-color: var(--status-inactive-bg);
     color: var(--status-inactive-text);
+}
+.status.tertunda {
+    background-color: rgba(255, 199, 0, 0.2);
+    color: #b38f00;
+}
+.status.proses {
+    background-color: rgba(66, 153, 225, 0.2);
+    color: #2b6cb0;
+}
+.status.selesai,
+.status.completed {
+    background-color: var(--status-active-bg);
+    color: var(--status-active-text);
 }
 
 .table-footer {
@@ -342,25 +366,8 @@ td:first-child {
     border-color: var(--brand-dark-red);
 }
 
-/* Status Pesanan */
-.status.tertunda {
-    background-color: rgba(255, 199, 0, 0.2); /* Kuning */
-    color: #b38f00;
-}
-.status.proses {
-    background-color: rgba(66, 153, 225, 0.2); /* Biru */
-    color: #2b6cb0;
-}
-.status.selesai,
-.status.completed {
-    background-color: var(--status-active-bg); /* Hijau */
-    color: var(--status-active-text);
-}
-
-/* PERBAIKAN CELL AKSI DI SINI */
-/* Hapus display:flex pada td agar tabel render dengan benar */
 .action-cell {
-    white-space: nowrap; /* Mencegah tombol turun baris */
+    white-space: nowrap;
 }
 
 /* Tombol Aksi */
@@ -373,65 +380,157 @@ td:first-child {
     cursor: pointer;
     transition: all 0.2s ease;
     color: white;
-    display: inline-flex; /* Menggantikan flex pada parent */
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-right: 0.5rem; /* Jarak antar tombol manual */
+    margin-right: 0.5rem;
     vertical-align: middle;
 }
 
-/* Menghapus margin pada tombol terakhir */
-.action-cell .action-btn:last-child {
-    margin-right: 0;
-}
+.action-cell .action-btn:last-child { margin-right: 0; }
+.action-btn.process { background-color: #4299e1; }
+.action-btn.process:hover { background-color: #2b6cb0; }
+.action-btn.complete { background-color: #38a169; }
+.action-btn.complete:hover { background-color: #256f4a; }
+.action-btn.detail { background-color: #8A8A8A; }
+.action-btn.detail:hover { background-color: #666666; }
+.action-btn.delete { background-color: #e74c3c; padding: 0.4rem 0.7rem; }
+.action-btn.delete:hover { background-color: #c0392b; }
+.action-btn.delete i { color: white; font-size: 0.8rem; }
 
-.action-btn.process {
-    background-color: #4299e1; /* Biru */
-}
-.action-btn.process:hover {
-    background-color: #2b6cb0;
-}
-.action-btn.complete {
-    background-color: #38a169; /* Hijau */
-}
-.action-btn.complete:hover {
-    background-color: #256f4a;
-}
-.action-btn.detail {
-    background-color: #8A8A8A; /* Abu-abu */
-}
-.action-btn.detail:hover {
-    background-color: #666666;
-}
-.action-btn.delete { 
-    background-color: #e74c3c; 
-    padding: 0.4rem 0.7rem;
-}
-.action-btn.delete:hover { 
-    background-color: #c0392b; 
-}
-.action-btn.delete i { 
-    color: white; 
-    font-size: 0.8rem; 
-}
-
-/* Ikon sidebar */
 .sidebar-nav li a i.fa-inbox,
 .sidebar-nav li a i.fa-history {
     font-size: 1rem;
 }
 
-/* --- Modal Pilih Produk (Admin) --- */
+/* === MODAL STYLES (DIPERBAIKI DI SINI) === */
+.custom-modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+}
+
+.custom-modal-content {
+    background-color: #fefefe;
+    padding: 25px 35px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: fadein 0.3s ease-out;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+@keyframes fadein {
+    from { opacity: 0; transform: translate(-50%, -55%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+/* Variant Modal */
+.detail-modal-content { max-width: 600px; }
+.confirm-modal-content { max-width: 420px; text-align: center; }
+
+/* Modal Header */
+.detail-modal-header {
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-modal-header h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: var(--brand-dark-red);
+}
+
+.close-modal, .close-detail-modal {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Detail Grid System (DIPERBAIKI UNTUK TEXT WRAPPING) */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px 25px;
+}
+
+.detail-item {
+    min-width: 0; /* FIX 1: Mencegah item grid melebar melampaui kolomnya */
+}
+
+.detail-item strong {
+    display: block;
+    color: #888;
+    font-weight: 500;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+}
+
+.detail-item span {
+    color: #333;
+    font-weight: 500;
+    display: block; /* FIX 2: Block element agar wrapping bekerja */
+    word-wrap: break-word;     /* Support browser lama */
+    overflow-wrap: break-word; /* Standar modern */
+    word-break: break-word;    /* FIX 3: Paksa potong kata panjang (sdddd...) */
+    line-height: 1.5;
+}
+
+.detail-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.detail-item textarea {
+    width: 100%;
+    height: 100px;
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: 'Poppins', sans-serif;
+    resize: vertical;
+}
+
+.detail-item span.status {
+    display: inline-block; 
+    width: auto; 
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Admin Modal (Produk) */
 .admin-modal {
-    display: none; /* Sembunyi default */
-    position: fixed; 
-    z-index: 2000; /* Tampil di atas segalanya */
+    display: none;
+    position: fixed;
+    z-index: 2000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.5); /* Latar gelap transparan */
+    background-color: rgba(0,0,0,0.5);
 }
 
 .admin-modal-content {
@@ -439,7 +538,7 @@ td:first-child {
     padding: 25px;
     border-radius: 8px;
     width: 90%;
-    max-width: 450px; /* Lebar modal */
+    max-width: 450px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     position: absolute;
     top: 50%;
@@ -456,40 +555,5 @@ td:first-child {
     font-weight: bold;
     cursor: pointer;
 }
+
 .admin-modal-close:hover { color: black; }
-
-.admin-modal-content h3 {
-    margin-top: 0;
-    color: #333;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 15px;
-}
-.admin-modal-content p {
-    font-size: 0.95rem;
-    color: #555;
-    margin-bottom: 20px;
-}
-
-.admin-produk-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.admin-produk-list li a {
-    display: block;
-    text-decoration: none;
-    padding: 12px 15px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    margin-bottom: 8px;
-    border-radius: 5px;
-    color: var(--brand-dark-red); /* Warna link biru */
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-.admin-produk-list li a:hover {
-    background: #e9ecef;
-    border-color: #ccc;
-    transform: scale(1.02); /* Efek hover kecil */
-}

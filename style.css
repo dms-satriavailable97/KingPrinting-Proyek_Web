@@ -116,6 +116,17 @@ body {
     width: 100%;
 }
 
+/* === [BARU] STYLE UNTUK MENU AKTIF SAAT SCROLL === */
+.nav ul li a.active {
+    color: var(--secondary-red);
+    font-weight: 600;
+}
+
+.nav ul li a.active::after {
+    width: 100%; /* Garis bawah tetap muncul saat aktif */
+}
+/* ================================================ */
+
 .hamburger {
     display: none;
     flex-direction: column;
@@ -500,14 +511,12 @@ section {
     align-items: flex-start;
 }
 
-/* --- Kolom Kiri (Sidebar) --- */
 .faq-sidebar {
     flex: 1;
     max-width: 400px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    /* Static (diam) saja */
 }
 
 .sub-title {
@@ -534,7 +543,6 @@ section {
     line-height: 1.6;
 }
 
-/* Kartu Bantuan (Help Card) */
 .help-card {
     background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
     border: 1px solid #eee;
@@ -579,7 +587,6 @@ section {
     gap: 12px;
 }
 
-/* --- Kolom Kanan (List FAQ) dengan SCROLL --- */
 .faq-list {
     flex: 1.5;
     display: flex;
@@ -587,18 +594,12 @@ section {
     justify-content: flex-start;
     min-width: 0;
     max-width: 100%;
-    
-    /* FIX 1: Gunakan max-height agar cukup untuk 5 item */
     max-height: 400px; 
-    
-    /* FIX 2: Tambahkan padding-bottom agar item terakhir tidak terpotong mepet */
     padding-bottom: 20px;
-    
-    overflow-y: auto; /* Scroll internal */
+    overflow-y: auto;
     padding-right: 10px;
 }
 
-/* Custom Scrollbar untuk FAQ List */
 .faq-list::-webkit-scrollbar {
     width: 6px;
 }
@@ -617,7 +618,6 @@ section {
     background: var(--dark-blue);
 }
 
-/* Item FAQ */
 .faq-item {
     margin-bottom: 1rem;
     border: 1px solid #e0e0e0;
@@ -627,8 +627,6 @@ section {
     transition: all 0.3s ease;
     transform: translateZ(0);
     max-width: 100%;
-    
-    /* FIX 3: Mencegah item menyusut (gepeng) */
     flex-shrink: 0; 
 }
 
@@ -658,13 +656,11 @@ section {
     overflow: hidden;
 }
 
-/* PERBAIKAN BUG: Mencegah teks panjang overflow pada pertanyaan FAQ */
 .faq-question h3 {
     font-size: 1.05rem;
     font-weight: 600;
     color: var(--dark-blue);
     margin: 0;
-    /* Fix: Memutus kata yang terlalu panjang */
     word-break: break-word;
     overflow-wrap: break-word;
     word-wrap: break-word;
@@ -705,14 +701,12 @@ section {
     background-color: #fff;
 }
 
-/* PERBAIKAN BUG: Mencegah teks panjang overflow pada jawaban FAQ */
 .faq-answer p {
     padding: 0 1.5rem 1.5rem 1.5rem;
     color: #666;
     font-size: 0.95rem;
     line-height: 1.6;
     margin: 0;
-    /* Fix: Memutus kata yang terlalu panjang */
     word-break: break-word;
     overflow-wrap: break-word;
     word-wrap: break-word;
@@ -740,7 +734,6 @@ section {
     overflow-y: auto;
 }
 
-/* Modal Content Order */
 #orderModal .modal-content {
     position: absolute;
     top: 50%;
@@ -793,7 +786,6 @@ section {
     margin: 0;
 }
 
-/* Form Layout Modal Order */
 .form-row {
     display: flex;
     gap: 15px;
@@ -945,7 +937,6 @@ section {
     width: 20px;
 }
 
-/* --- MAP SQUARE FIX --- */
 .map-container {
     margin-bottom: 3rem;
     border-radius: 0;
@@ -1038,7 +1029,6 @@ section {
     .myHeroSlider .swiper-slide img {
         height: 300px;
     }
-    /* Responsive FAQ untuk Tablet/Layar Sedang */
     .faq-wrapper {
         flex-direction: column;
         gap: 3rem;

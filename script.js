@@ -203,3 +203,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// === [BARU] ACTIVE LINK ON SCROLL (ScrollSpy) ===
+const sections = document.querySelectorAll('section, footer'); // Pilih semua section + footer
+const navLinks = document.querySelectorAll('.nav ul li a');
+
+window.addEventListener('scroll', () => {
+    let current = '';
+    
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        // 150 adalah offset (jarak toleransi) agar menu aktif sebelum section benar-benar mentok atas
+        if (scrollY >= (sectionTop - 150)) {
+            current = section.getAttribute('id');
+        }
+    });
+
+    navLinks.forEach(li => {
+        li.classList.remove('active');
+        // Cek apakah href menu mengandung ID section yang aktif
+        if (li.getAttribute('href').includes(current)) {
+            li.classList.add('active');
+        }
+    });
+});

@@ -6,38 +6,30 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 require_once 'config.php';
 
-// === FILTER DATE ===
 $filter_date = isset($_GET['date']) && !empty($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 
-// === KONFIGURASI PAGINATION ===
 $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) $page = 1;
 
-// 1. Hitung Total Data
 $sql_count = "SELECT COUNT(*) as total FROM pesanan WHERE status = 'Selesai' AND DATE(tanggal_masuk) = '$filter_date'";
 $result_count = $conn->query($sql_count);
 $total_data = $result_count->fetch_assoc()['total'];
 $total_pages = ceil($total_data / $limit);
 
-// === PERBAIKAN PAGINATION REDIRECT (SAMA SEPERTI PESANAN.PHP) ===
-// Jika halaman saat ini lebih besar dari total halaman yang ada (dan total data > 0)
 if ($page > $total_pages && $total_pages > 0) {
     $queryParams = $_GET;
     $queryParams['page'] = $total_pages;
     $newQueryString = http_build_query($queryParams);
-    
     header("Location: ?" . $newQueryString);
     exit;
 }
-// Jika total data 0, reset ke page 1
 if ($total_pages == 0) {
     $page = 1;
 }
 
 $offset = ($page - 1) * $limit;
 
-// 2. Ambil Data
 $sql = "SELECT id, nama_pemesan, produk, tanggal_masuk, status 
         FROM pesanan 
         WHERE status = 'Selesai' AND DATE(tanggal_masuk) = '$filter_date'
@@ -54,68 +46,12 @@ $result = $conn->query($sql);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
+    <!-- Style sudah dihandle di dashboard.css yang baru -->
     <style>
-        /* === CSS DISAMAKAN DENGAN pesanan.php === */
-        
-        /* Filter Header Styles */
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eee;
-        }
-        .header-title h3 { margin: 0; font-size: 1.3rem; color: #333; font-weight: 600; }
-        .header-subtitle { font-size: 0.9rem; color: #888; margin-top: 4px; }
-
-        /* Tombol Kalender */
-        .date-picker-wrapper {
-            position: relative;
-            width: 42px;
-            height: 40px;
-            background-color: #9a2020;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.3s;
-            box-shadow: 0 2px 5px rgba(154, 32, 32, 0.2);
-        }
-        .date-picker-wrapper:hover { background-color: #7a1a1a; }
-        .date-icon { color: white; font-size: 1.2rem; pointer-events: none; }
-        .invisible-date-input {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; cursor: pointer; z-index: 10;
-        }
-        .invisible-date-input::-webkit-calendar-picker-indicator {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            padding: 0; margin: 0; cursor: pointer; opacity: 0;
-        }
-
-        /* Table & Buttons Styles (PERSIS pesanan.php) */
-        table td, table th { vertical-align: middle !important; }
-        .action-cell { white-space: nowrap; }
-        
-        /* Ini style tombol delete yang sudah disesuaikan agar tidak mengecil/membesar aneh */
-        .action-btn.delete { 
-            background-color: #e74c3c !important; 
-            color: white !important; 
-            padding: 0.4rem 0.7rem; 
-            border-radius: 5px; 
-            border: none; 
-            cursor: pointer; 
-            margin-left: 10px; 
-            transition: 0.2s; 
-        }
-        /* Tidak ada override font-size icon di sini agar ikut dashboard.css (0.8rem) */
-
-        /* Modal Styles */
+        /* Modal Styles untuk Detail/Delete */
         .custom-modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
         .custom-modal-content { background-color: #fefefe; padding: 25px 35px; border-radius: 15px; width: 90%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; max-height: 90vh; overflow-y: auto; animation: fadein 0.3s ease-out; }
         @keyframes fadein { from { opacity: 0; transform: translate(-50%, -55%); } to { opacity: 1; transform: translate(-50%, -50%); } }
-        
         .detail-modal-content { max-width: 600px; }
         .detail-modal-header { padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .detail-modal-header h2 { margin: 0; font-size: 1.6rem; color: #9a2020; }
@@ -125,14 +61,18 @@ $result = $conn->query($sql);
         .detail-item span { color: #333; font-weight: 500; }
         .detail-item.full-width { grid-column: 1 / -1; }
         .detail-item textarea { width: 100%; height: 100px; background: #f9f9f9; border: 1px solid #eee; border-radius: 5px; padding: 10px; font-family: 'Poppins', sans-serif; resize: vertical; }
-        
         .confirm-modal-content { max-width: 420px; text-align: center; }
         .confirm-actions { display: flex; justify-content: center; gap: 1rem; }
         
-        .pagination { display: flex; justify-content: center; margin-top: 20px; gap: 5px; align-items: center; }
-        .pagination a { padding: 8px 12px; border: 1px solid #ddd; color: #333; text-decoration: none; border-radius: 5px; }
-        .pagination a.active { background-color: #9a2020; color: white; border-color: #9a2020; }
-        .pagination span.dots { padding: 0 5px; color: #888; }
+        /* Header & Date Picker */
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
+        .header-title h3 { margin: 0; font-size: 1.3rem; color: #333; font-weight: 600; }
+        .header-subtitle { font-size: 0.9rem; color: #888; margin-top: 4px; }
+        .date-picker-wrapper { position: relative; width: 42px; height: 40px; background-color: #9a2020; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.3s; box-shadow: 0 2px 5px rgba(154, 32, 32, 0.2); }
+        .date-picker-wrapper:hover { background-color: #7a1a1a; }
+        .date-icon { color: white; font-size: 1.2rem; pointer-events: none; }
+        .invisible-date-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10; }
+        .invisible-date-input::-webkit-calendar-picker-indicator { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 0; margin: 0; cursor: pointer; opacity: 0; }
     </style>
 </head>
 <body>
@@ -202,10 +142,19 @@ $result = $conn->query($sql);
                         <?php
                         if ($result->num_rows > 0) {
                             while($row = $result->fetch_assoc()) {
+                                // PERBAIKAN DI SINI: Menambahkan title untuk tooltip
+                                $nama_aman = htmlspecialchars($row['nama_pemesan']);
+                                $produk_aman = htmlspecialchars($row['produk']);
+
                                 echo "<tr data-id='" . $row['id'] . "'>";
                                 echo "<td>#KP" . str_pad($row['id'], 3, '0', STR_PAD_LEFT) . "</td>";
-                                echo "<td>" . htmlspecialchars($row['nama_pemesan']) . "</td>";
-                                echo "<td>" . htmlspecialchars($row['produk']) . "</td>";
+                                
+                                // Nama dengan Tooltip
+                                echo "<td title='$nama_aman'>" . $nama_aman . "</td>";
+                                
+                                // Produk dengan Tooltip
+                                echo "<td title='$produk_aman'>" . $produk_aman . "</td>";
+                                
                                 echo "<td>" . date('d M Y, H:i', strtotime($row['tanggal_masuk'])) . "</td>";
                                 echo "<td><span class='status completed'>" . htmlspecialchars($row['status']) . "</span></td>";
                                 echo "<td class='action-cell'>
@@ -243,7 +192,7 @@ $result = $conn->query($sql);
         </main>
     </div>
 
-    <!-- Modal Details & Delete -->
+    <!-- Modal Details & Delete (Sama) -->
     <div id="detailModal" class="custom-modal">
         <div class="custom-modal-content detail-modal-content">
             <div class="detail-modal-header">

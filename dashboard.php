@@ -1,26 +1,21 @@
 <?php
-// Memulai session
 session_start();
-// Include koneksi database
 require_once 'config.php';
 
-// Memeriksa apakah user sudah login. Jika belum, tendang ke halaman utama.
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("location: index.php");
     exit;
 }
 
-// Menghitung jumlah pesanan dengan status 'Tertunda'
+// Hitung Statistik
 $sql_tertunda = "SELECT COUNT(*) as count FROM pesanan WHERE status = 'Tertunda'";
 $result_tertunda = $conn->query($sql_tertunda);
 $jumlah_tertunda = $result_tertunda ? $result_tertunda->fetch_assoc()['count'] : 0;
 
-// Menghitung jumlah pesanan dengan status 'Proses'
 $sql_proses = "SELECT COUNT(*) as count FROM pesanan WHERE status = 'Proses'";
 $result_proses = $conn->query($sql_proses);
 $jumlah_proses = $result_proses ? $result_proses->fetch_assoc()['count'] : 0;
 
-// Menghitung jumlah total pesanan
 $sql_orders = "SELECT COUNT(*) as count FROM pesanan";
 $result_orders = $conn->query($sql_orders);
 $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
@@ -36,60 +31,23 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
     <style>
-        /* === MODAL CENTERED FIX === */
-        .detail-modal { 
-            display: none; 
-            position: fixed; 
-            z-index: 1001; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            height: 100%; 
-            overflow: hidden; 
-            background-color: rgba(0,0,0,0.6); 
-            backdrop-filter: blur(5px); 
-        }
-
-        .detail-modal-content { 
-            background-color: #fefefe; 
-            padding: 25px 35px; 
-            border-radius: 15px; 
-            width: 90%; 
-            max-width: 600px; 
-            
-            /* CENTERED */
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%);
-            margin: 0;
-            
-            max-height: 90vh;
-            overflow-y: auto;
-            
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
-            animation: fadein 0.3s ease-out; 
-        }
-
-        @keyframes fadein { 
-            from { opacity: 0; transform: translate(-50%, -55%); } 
-            to { opacity: 1; transform: translate(-50%, -50%); } 
-        }
-
+        /* Modal Styles */
+        .detail-modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
+        .detail-modal-content { background-color: #fefefe; padding: 25px 35px; border-radius: 15px; width: 90%; max-width: 600px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: fadein 0.3s ease-out; }
+        @keyframes fadein { from { opacity: 0; transform: translate(-50%, -55%); } to { opacity: 1; transform: translate(-50%, -50%); } }
         .detail-modal-header { padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .detail-modal-header h2 { margin: 0; font-size: 1.6rem; color: var(--brand-dark-red); }
         .close-detail-modal { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
         .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 25px; }
-        .detail-item { font-size: 0.95rem; }
         .detail-item strong { display: block; color: #888; font-weight: 500; margin-bottom: 4px; font-size: 0.85rem; }
         .detail-item span { color: var(--text-primary); font-weight: 500; }
         .detail-item.full-width { grid-column: 1 / -1; }
         .detail-item textarea { width: 100%; height: 100px; background: #f9f9f9; border: 1px solid #eee; border-radius: 5px; padding: 10px; font-family: 'Poppins', sans-serif; resize: vertical; }
         
-        /* Dropdown Status */
+        /* Status Dropdown */
         .status-wrapper { position: relative; display: inline-block; }
-        .status.interactive { cursor: pointer; transition: background-color 0.2s, color 0.2s; }
-        .status.interactive:hover { filter: brightness(1.1); }
+        .status.interactive { cursor: pointer; transition: opacity 0.2s; }
+        .status.interactive:hover { opacity: 0.8; }
         .status-dropdown { display: none; position: absolute; top: 100%; left: 0; background-color: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 120px; list-style: none; padding: 5px 0; z-index: 10; margin-top: 5px; }
         .status-dropdown li { padding: 8px 15px; font-size: 0.9rem; cursor: pointer; transition: background-color 0.2s; }
         .status-dropdown li:hover { background-color: #f5f5f5; }
@@ -131,11 +89,11 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                 </div>
                  <div class="card">
                     <div class="card-icon" style="color: #ffc700;"><i class="fas fa-clock"></i></div>
-                    <div class="card-info"><p>Pesanan Tertunda</p><h4><?php echo $jumlah_tertunda; ?></h4></div>
+                    <div class="card-info"><p>Pesanan Tertunda</p><h4 id="countTertunda"><?php echo $jumlah_tertunda; ?></h4></div>
                 </div>
                 <div class="card">
                     <div class="card-icon" style="color: #4299e1;"><i class="fas fa-sync-alt"></i></div>
-                    <div class="card-info"><p>Pesanan Diproses</p><h4><?php echo $jumlah_proses; ?></h4></div>
+                    <div class="card-info"><p>Pesanan Diproses</p><h4 id="countProses"><?php echo $jumlah_proses; ?></h4></div>
                 </div>
             </section>
 
@@ -154,17 +112,24 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                     </thead>
                     <tbody>
                         <?php
-                        $sql = "SELECT id, nama_pemesan, produk, tanggal_masuk, status FROM pesanan WHERE status IN ('Tertunda', 'Proses') ORDER BY FIELD(status, 'Proses', 'Tertunda'), tanggal_masuk DESC LIMIT 5";
+                        $sql = "SELECT id, nama_pemesan, produk, tanggal_masuk, status, telepon, ukuran, bahan, jumlah, catatan 
+                                FROM pesanan 
+                                WHERE status IN ('Tertunda', 'Proses') 
+                                ORDER BY tanggal_masuk DESC LIMIT 5";
                         $result = $conn->query($sql);
 
                         if ($result->num_rows > 0) {
                             while($row = $result->fetch_assoc()) {
                                 $status = htmlspecialchars($row['status']);
                                 $status_class = strtolower($status);
+                                
+                                $nama_aman = htmlspecialchars($row['nama_pemesan']);
+                                $produk_aman = htmlspecialchars($row['produk']);
+
                                 echo "<tr data-id='" . $row['id'] . "'>";
                                 echo "<td>#KP" . str_pad($row['id'], 3, '0', STR_PAD_LEFT) . "</td>";
-                                echo "<td>" . htmlspecialchars($row['nama_pemesan']) . "</td>";
-                                echo "<td>" . htmlspecialchars($row['produk']) . "</td>";
+                                echo "<td title='$nama_aman'>" . $nama_aman . "</td>";
+                                echo "<td title='$produk_aman'>" . $produk_aman . "</td>";
                                 echo "<td>" . date('d M Y', strtotime($row['tanggal_masuk'])) . "</td>";
                                 echo "<td>
                                         <div class='status-wrapper'>
@@ -181,7 +146,7 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                         ?>
                     </tbody>
                 </table>
-                 <div class="table-footer"><span>Menampilkan pesanan aktif terbaru</span></div>
+                 <div class="table-footer"><span>Menampilkan 5 pesanan aktif terbaru</span></div>
             </section>
         </main>
     </div>
@@ -193,7 +158,7 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                 <h2 id="detailModalTitle">Detail Pesanan</h2>
                 <span class="close-detail-modal">&times;</span>
             </div>
-            <div id="detailModalBody" class="detail-grid"><!-- Konten detail di-load di sini --></div>
+            <div id="detailModalBody" class="detail-grid"></div>
         </div>
     </div>
 
@@ -204,9 +169,9 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
         const closeDetailModal = document.querySelector('.close-detail-modal');
         let activeDropdown = null;
 
+        // Pencarian Client-side
         const searchInput = document.getElementById('searchInput');
         const tableRows = document.querySelectorAll('#ordersTable tbody tr');
-
         if (searchInput) {
             searchInput.addEventListener('keyup', function() {
                 const searchTerm = this.value.toLowerCase().trim();
@@ -224,19 +189,76 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
             });
         }
 
-        function updateOrderStatus(orderId, newStatus) {
+        // UPDATE STATUS (AJAX)
+        function updateOrderStatus(orderId, newStatus, statusElement) {
+            const originalStatus = statusElement.textContent;
+            statusElement.style.opacity = '0.5';
+
             const formData = new FormData();
             formData.append('id', orderId);
             formData.append('status', newStatus);
+            
             fetch('update-status.php', { method: 'POST', body: formData })
             .then(response => response.json())
             .then(data => {
+                statusElement.style.opacity = '1';
+                
                 if (data.success) {
-                    window.location.reload(); 
+                    // 1. Jika jadi "Selesai", hapus dari dashboard
+                    if (newStatus === 'Selesai') {
+                        const row = statusElement.closest('tr');
+                        if (row) {
+                            row.style.transition = 'opacity 0.5s';
+                            row.style.opacity = '0';
+                            setTimeout(() => {
+                                row.remove();
+                                const tbody = document.querySelector('#ordersTable tbody');
+                                if (tbody.rows.length === 0) {
+                                    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 2rem;'>Tidak ada pesanan aktif untuk diproses.</td></tr>";
+                                }
+                            }, 500);
+                        }
+                    } 
+                    // 2. Jika status lain, update tampilan
+                    else {
+                        statusElement.textContent = newStatus;
+                        statusElement.classList.remove('tertunda', 'proses', 'selesai', 'completed');
+                        statusElement.classList.add(newStatus.toLowerCase());
+                        statusElement.setAttribute('data-current-status', newStatus);
+                    }
+
+                    updateCounters(originalStatus, newStatus);
+
+                    if (activeDropdown) {
+                        activeDropdown.style.display = 'none';
+                        activeDropdown = null;
+                    }
                 } else {
                     alert('Gagal: ' + data.message);
+                    statusElement.textContent = originalStatus;
                 }
-            }).catch(() => alert('Terjadi kesalahan jaringan.'));
+            }).catch(() => {
+                statusElement.style.opacity = '1';
+                statusElement.textContent = originalStatus;
+                alert('Terjadi kesalahan jaringan.');
+            });
+        }
+
+        function updateCounters(oldStatus, newStatus) {
+            const elTertunda = document.getElementById('countTertunda');
+            const elProses = document.getElementById('countProses');
+            
+            let valTertunda = parseInt(elTertunda.innerText);
+            let valProses = parseInt(elProses.innerText);
+
+            if (oldStatus === 'Tertunda') valTertunda--;
+            else if (oldStatus === 'Proses') valProses--;
+
+            if (newStatus === 'Tertunda') valTertunda++;
+            else if (newStatus === 'Proses') valProses++;
+
+            elTertunda.innerText = valTertunda;
+            elProses.innerText = valProses;
         }
 
         if(table) {
@@ -247,27 +269,32 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
 
                 if (statusTrigger) {
                     const dropdown = statusTrigger.nextElementSibling;
-                    if (activeDropdown && activeDropdown !== dropdown) activeDropdown.style.display = 'none';
-                    const currentStatus = statusTrigger.dataset.currentStatus;
+                    const currentStatus = statusTrigger.getAttribute('data-current-status');
                     let options = '';
-                    if (currentStatus === 'Tertunda') options = `<li data-new-status="Proses">Proses</li><li data-new-status="Selesai">Selesai</li>`;
-                    else if (currentStatus === 'Proses') options = `<li data-new-status="Selesai">Selesai</li><li data-new-status="Tertunda">Tertunda</li>`;
+                    
+                    // === LOGIKA PERBAIKAN DI SINI ===
+                    // Tertunda hanya bisa ke Proses
+                    if (currentStatus === 'Tertunda') {
+                        options = `<li data-new-status="Proses">Proses</li>`;
+                    } 
+                    // Proses bisa ke Selesai atau Balik ke Tertunda
+                    else if (currentStatus === 'Proses') {
+                        options = `<li data-new-status="Selesai">Selesai</li><li data-new-status="Tertunda">Tertunda</li>`;
+                    }
+                    
                     dropdown.innerHTML = options;
+                    
+                    if (activeDropdown && activeDropdown !== dropdown) activeDropdown.style.display = 'none';
                     dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
                     activeDropdown = (dropdown.style.display === 'block') ? dropdown : null;
-                    return;
                 }
-
-                if (dropdownItem) {
+                else if (dropdownItem) {
                     const newStatus = dropdownItem.dataset.newStatus;
+                    const statusElement = dropdownItem.closest('.status-wrapper').querySelector('.status.interactive');
                     const orderId = dropdownItem.closest('tr').dataset.id;
-                    updateOrderStatus(orderId, newStatus);
-                    if (activeDropdown) activeDropdown.style.display = 'none';
-                    activeDropdown = null;
-                    return;
+                    updateOrderStatus(orderId, newStatus, statusElement);
                 }
-
-                if (detailButton) {
+                else if (detailButton) {
                     const orderId = detailButton.closest('tr').getAttribute('data-id');
                     if (orderId) {
                         fetch(`get-order-details.php?id=${orderId}`)
@@ -293,9 +320,8 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                             } else {
                                 alert('Gagal memuat detail: ' + data.message);
                             }
-                        }).catch(() => alert('Terjadi kesalahan jaringan.'));
+                        });
                     }
-                    return;
                 }
             });
         }
@@ -306,6 +332,7 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                 activeDropdown = null;
             }
         });
+        
         if(closeDetailModal) closeDetailModal.onclick = () => { detailModal.style.display = "none"; }
         window.onclick = (event) => { if (event.target == detailModal) detailModal.style.display = "none"; }
     });

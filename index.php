@@ -37,8 +37,9 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
             </div>
             <nav class="nav">
                 <ul>
-                    <li><a href="#home">Beranda</a></li>
-                    <li><a href="#produk">Produk</a></li>
+                    <!-- Perhatikan href dan class active default -->
+                    <li><a href="#home" class="active">Beranda</a></li>
+                    <li><a href="#produk">Layanan</a></li>
                     <li><a href="#cara-kerja">Cara Pesan</a></li>
                     <li><a href="#faq">FAQ</a></li>
                     <li><a href="#kontak">Kontak</a></li>
@@ -52,6 +53,7 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
         </div>
     </header>
 
+    <!-- Section Home dengan ID home -->
     <section class="hero" id="home">
         <div class="container">
             <div class="hero-content">
@@ -113,6 +115,7 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
         </div>
     </section>
 
+    <!-- Section Produk dengan ID produk -->
     <section class="produk" id="produk">
         <div class="container">
             <h2 class="section-title">Layanan <span class="highlight">Kami</span></h2>
@@ -150,6 +153,7 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
         </div>
     </section>
 
+    <!-- Section Cara Kerja dengan ID cara-kerja -->
     <section class="cara-kerja" id="cara-kerja">
         <div class="container">
             <h2 class="section-title">Cara Memesan di <span class="highlight">King Printing</span></h2>
@@ -211,7 +215,7 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
         </div>
     </section>
 
-    <!-- MULAI SECTION FAQ (LAYOUT BARU: 2 KOLOM) -->
+    <!-- Section FAQ dengan ID faq -->
     <section class="faq-section" id="faq">
         <div class="container">
             <div class="faq-wrapper">
@@ -268,7 +272,6 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
             </div>
         </div>
     </section>
-    <!-- AKHIR SECTION FAQ -->
 
     <!-- Modal dan Footer tetap sama -->
     <div class="modal" id="orderModal">
@@ -332,6 +335,7 @@ $hero_parts = preg_split('/({highlight}|{\/highlight})/', $hero_title, -1, PREG_
         </div>
     </div>
 
+    <!-- Footer dengan ID kontak -->
     <footer class="footer" id="kontak">
     <div class="container">
         <div class="map-container">
