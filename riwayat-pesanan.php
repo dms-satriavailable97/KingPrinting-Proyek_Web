@@ -6,17 +6,31 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 require_once 'config.php';
 
+// === KONFIGURASI SEARCH & FILTER ===
+$search_query = isset($_GET['q']) ? trim($conn->real_escape_string($_GET['q'])) : '';
 $filter_date = isset($_GET['date']) && !empty($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 
+// === PAGINATION CONFIG ===
 $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) $page = 1;
 
-$sql_count = "SELECT COUNT(*) as total FROM pesanan WHERE status = 'Selesai' AND DATE(tanggal_masuk) = '$filter_date'";
+// === LOGIKA PENCARIAN ===
+// Jika ada query search, abaikan tanggal (Global Search untuk status Selesai)
+if (!empty($search_query)) {
+    $where_sql = "status = 'Selesai' AND (id LIKE '%$search_query%' OR nama_pemesan LIKE '%$search_query%' OR produk LIKE '%$search_query%')";
+} else {
+    // Jika tidak ada search, gunakan filter tanggal
+    $where_sql = "status = 'Selesai' AND DATE(tanggal_masuk) = '$filter_date'";
+}
+
+// Hitung Total Data
+$sql_count = "SELECT COUNT(*) as total FROM pesanan WHERE $where_sql";
 $result_count = $conn->query($sql_count);
 $total_data = $result_count->fetch_assoc()['total'];
 $total_pages = ceil($total_data / $limit);
 
+// === PAGINATION REDIRECT ===
 if ($page > $total_pages && $total_pages > 0) {
     $queryParams = $_GET;
     $queryParams['page'] = $total_pages;
@@ -32,7 +46,7 @@ $offset = ($page - 1) * $limit;
 
 $sql = "SELECT id, nama_pemesan, produk, tanggal_masuk, status 
         FROM pesanan 
-        WHERE status = 'Selesai' AND DATE(tanggal_masuk) = '$filter_date'
+        WHERE $where_sql
         ORDER BY tanggal_masuk DESC 
         LIMIT $limit OFFSET $offset";
 $result = $conn->query($sql);
@@ -46,7 +60,6 @@ $result = $conn->query($sql);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
-    <!-- Style sudah dihandle di dashboard.css yang baru -->
     <style>
         /* Modal Styles untuk Detail/Delete */
         .custom-modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
@@ -65,7 +78,7 @@ $result = $conn->query($sql);
         .confirm-actions { display: flex; justify-content: center; gap: 1rem; }
         
         /* Header & Date Picker */
-        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem;}
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
         .header-title h3 { margin: 0; font-size: 1.3rem; color: #333; font-weight: 600; }
         .header-subtitle { font-size: 0.9rem; color: #888; margin-top: 4px; }
         .date-picker-wrapper { position: relative; width: 42px; height: 40px; background-color: #9a2020; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.3s; box-shadow: 0 2px 5px rgba(154, 32, 32, 0.2); }
@@ -95,10 +108,13 @@ $result = $conn->query($sql);
             <header class="main-header">
                 <div class="header-left"><h3>Riwayat Pesanan Selesai</h3></div>
                 <div class="header-right">
-                    <div class="search-box">
+                    <!-- SEARCH FORM UPDATE -->
+                    <form method="GET" action="" class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="Cari Riwayat (Halaman ini)...">
-                    </div>
+                        <input type="text" name="q" id="searchInput" 
+                               placeholder="Cari (Tekan Enter)..." 
+                               value="<?php echo htmlspecialchars($search_query); ?>">
+                    </form>
                 </div>
             </header>
             
@@ -107,17 +123,24 @@ $result = $conn->query($sql);
                     <div class="header-title">
                         <h3>
                             <?php 
-                            if($filter_date == date('Y-m-d')) {
+                            if (!empty($search_query)) {
+                                echo "Hasil Pencarian: \"" . htmlspecialchars($search_query) . "\"";
+                            } elseif($filter_date == date('Y-m-d')) {
                                 echo "Riwayat Selesai Hari Ini";
                             } else {
                                 echo "Riwayat Selesai " . date('d M Y', strtotime($filter_date));
                             }
                             ?>
                         </h3>
-                        <div class="header-subtitle">Total Riwayat: <?php echo $total_data; ?></div>
+                        <div class="header-subtitle">Total Data: <?php echo $total_data; ?></div>
                     </div>
 
                     <form id="filterForm" method="GET">
+                        <!-- Simpan query search agar tidak hilang jika datepicker disentuh -->
+                        <?php if(!empty($search_query)): ?>
+                            <input type="hidden" name="q" value="<?php echo htmlspecialchars($search_query); ?>">
+                        <?php endif; ?>
+
                         <div class="date-picker-wrapper" title="Pilih Tanggal">
                             <i class="fas fa-calendar-alt date-icon"></i>
                             <input type="date" name="date" class="invisible-date-input" 
@@ -142,19 +165,13 @@ $result = $conn->query($sql);
                         <?php
                         if ($result->num_rows > 0) {
                             while($row = $result->fetch_assoc()) {
-                                // PERBAIKAN DI SINI: Menambahkan title untuk tooltip
                                 $nama_aman = htmlspecialchars($row['nama_pemesan']);
                                 $produk_aman = htmlspecialchars($row['produk']);
 
                                 echo "<tr data-id='" . $row['id'] . "'>";
                                 echo "<td>#KP" . str_pad($row['id'], 3, '0', STR_PAD_LEFT) . "</td>";
-                                
-                                // Nama dengan Tooltip
                                 echo "<td title='$nama_aman'>" . $nama_aman . "</td>";
-                                
-                                // Produk dengan Tooltip
                                 echo "<td title='$produk_aman'>" . $produk_aman . "</td>";
-                                
                                 echo "<td>" . date('d M Y, H:i', strtotime($row['tanggal_masuk'])) . "</td>";
                                 echo "<td><span class='status completed'>" . htmlspecialchars($row['status']) . "</span></td>";
                                 echo "<td class='action-cell'>
@@ -164,7 +181,11 @@ $result = $conn->query($sql);
                                 echo "</tr>";
                             }
                         } else {
-                            echo "<tr><td colspan='6' style='text-align:center; padding: 2rem;'>Belum ada riwayat pesanan selesai pada tanggal ini.</td></tr>";
+                            $msg = !empty($search_query) 
+                                ? "Tidak ada riwayat yang cocok dengan pencarian Anda."
+                                : "Belum ada riwayat pesanan selesai pada tanggal ini.";
+                                
+                            echo "<tr><td colspan='6' style='text-align:center; padding: 2rem;'>$msg</td></tr>";
                         }
                         $conn->close();
                         ?>
@@ -225,24 +246,8 @@ $result = $conn->query($sql);
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         let orderIdToDelete = null;
 
-        const searchInput = document.getElementById('searchInput');
-        const tableRows = document.querySelectorAll('#historyTable tbody tr');
-        if (searchInput) {
-            searchInput.addEventListener('keyup', function() {
-                const searchTerm = this.value.toLowerCase().trim();
-                tableRows.forEach(row => {
-                    if (row.cells.length === 1 && row.cells[0].getAttribute('colspan')) return;
-                    const textId = row.cells[0] ? row.cells[0].textContent.toLowerCase() : '';
-                    const textNama = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
-                    const textProduk = row.cells[2] ? row.cells[2].textContent.toLowerCase() : '';
-                    if (textId.includes(searchTerm) || textNama.includes(searchTerm) || textProduk.includes(searchTerm)) {
-                        row.style.display = "";
-                    } else {
-                        row.style.display = "none";
-                    }
-                });
-            });
-        }
+        // === (REMOVED) CLIENT-SIDE SEARCH JS ===
+        // Script pencarian JS dihapus
 
         function executeDelete(orderId) {
             const formData = new FormData();

@@ -6,7 +6,8 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 require_once 'config.php';
 
-// === KONFIGURASI FILTER ===
+// === KONFIGURASI FILTER & PENCARIAN ===
+$search_query = isset($_GET['q']) ? trim($conn->real_escape_string($_GET['q'])) : '';
 $filter_date = isset($_GET['date']) && !empty($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $filter_status = isset($_GET['status_filter']) && !empty($_GET['status_filter']) ? $_GET['status_filter'] : 'all';
 
@@ -16,8 +17,18 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) $page = 1;
 
 // === QUERY WHERE CLAUSE ===
-$where_clauses = ["DATE(tanggal_masuk) = '$filter_date'"];
+$where_clauses = [];
 
+// 1. Logika Pencarian Global (Mengabaikan Tanggal jika ada search)
+if (!empty($search_query)) {
+    // Cari berdasarkan ID, Nama, atau Produk
+    $where_clauses[] = "(id LIKE '%$search_query%' OR nama_pemesan LIKE '%$search_query%' OR produk LIKE '%$search_query%')";
+} else {
+    // Jika TIDAK mencari, gunakan filter tanggal
+    $where_clauses[] = "DATE(tanggal_masuk) = '$filter_date'";
+}
+
+// 2. Logika Status (Tetap berlaku meski sedang mencari)
 if ($filter_status === 'Tertunda') $where_clauses[] = "status = 'Tertunda'";
 elseif ($filter_status === 'Proses') $where_clauses[] = "status = 'Proses'";
 elseif ($filter_status === 'all') $where_clauses[] = "status IN ('Tertunda', 'Proses')";
@@ -63,7 +74,9 @@ $result = $conn->query($sql);
     <link rel="stylesheet" href="dashboard.css">
     <style>
         /* Style tambahan */
-        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem;}
+        /* PERBAIKAN CSS: Menghapus border-bottom */
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; }
+        
         .header-title h3 { margin: 0; font-size: 1.3rem; color: #333; font-weight: 600; }
         .header-subtitle { font-size: 0.9rem; color: #888; margin-top: 4px; }
         
@@ -128,10 +141,13 @@ $result = $conn->query($sql);
             <header class="main-header">
                 <div class="header-left"><h3>Pesanan Aktif</h3></div>
                 <div class="header-right">
-                    <div class="search-box">
+                    <!-- SEARCH FORM UPDATE -->
+                    <form method="GET" action="" class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="Cari Pesanan...">
-                    </div>
+                        <input type="text" name="q" id="searchInput" 
+                               placeholder="Cari (Tekan Enter)..." 
+                               value="<?php echo htmlspecialchars($search_query); ?>">
+                    </form>
                 </div>
             </header>
             
@@ -140,23 +156,31 @@ $result = $conn->query($sql);
                     <div class="header-title">
                         <h3>
                             <?php 
-                            if($filter_date == date('Y-m-d')) {
+                            if (!empty($search_query)) {
+                                echo "Hasil Pencarian: \"" . htmlspecialchars($search_query) . "\"";
+                            } elseif ($filter_date == date('Y-m-d')) {
                                 echo "Pesanan Hari Ini";
                             } else {
                                 echo "Pesanan Tanggal " . date('d M Y', strtotime($filter_date));
                             }
                             ?>
                         </h3>
-                        <div class="header-subtitle">Total Pesanan: <?php echo $total_data; ?></div>
+                        <div class="header-subtitle">Total Data: <?php echo $total_data; ?></div>
                     </div>
                     
                     <form id="filterForm" method="GET" class="filter-group">
+                        <!-- Simpan query search jika ada saat filter diubah -->
+                        <?php if(!empty($search_query)): ?>
+                            <input type="hidden" name="q" value="<?php echo htmlspecialchars($search_query); ?>">
+                        <?php endif; ?>
+
                         <select name="status_filter" class="custom-select" onchange="document.getElementById('filterForm').submit()">
                             <option value="all" <?php echo $filter_status == 'all' ? 'selected' : ''; ?>>Semua Status</option>
                             <option value="Tertunda" <?php echo $filter_status == 'Tertunda' ? 'selected' : ''; ?>>Tertunda</option>
                             <option value="Proses" <?php echo $filter_status == 'Proses' ? 'selected' : ''; ?>>Proses</option>
                         </select>
 
+                        <!-- Jika mode pencarian aktif, datepicker opsional/dinonaktifkan visualnya, tapi tetap bisa dipakai untuk reset -->
                         <div class="date-picker-wrapper" title="Pilih Tanggal">
                             <i class="fas fa-calendar-alt date-icon"></i>
                             <input type="date" name="date" class="invisible-date-input" 
@@ -205,9 +229,13 @@ $result = $conn->query($sql);
                                 echo "</tr>";
                             }
                         } else {
+                            $msg = !empty($search_query) 
+                                ? "Tidak ada pesanan yang cocok dengan pencarian Anda."
+                                : "Tidak ada pesanan untuk filter ini.";
+                            
                             echo "<tr><td colspan='6' style='text-align:center; padding: 3rem; color: #888;'>
                                     <i class='fas fa-box-open' style='font-size: 2.5rem; margin-bottom: 15px; color: #ddd; display:block;'></i>
-                                    Tidak ada pesanan untuk filter ini.
+                                    $msg
                                   </td></tr>";
                         }
                         $conn->close();
@@ -272,25 +300,13 @@ $result = $conn->query($sql);
         let rowToDelete = null; 
 
         const searchInput = document.getElementById('searchInput');
-        const tableRows = document.querySelectorAll('#ordersTable tbody tr');
         
         // === Ambil Filter yang sedang Aktif ===
         const filterSelect = document.querySelector('select[name="status_filter"]');
-        const currentFilter = filterSelect ? filterSelect.value : 'all'; // 'all', 'Tertunda', 'Proses'
+        const currentFilter = filterSelect ? filterSelect.value : 'all';
 
-        if (searchInput) {
-            searchInput.addEventListener('keyup', function() {
-                const searchTerm = this.value.toLowerCase().trim();
-                tableRows.forEach(row => {
-                    if (row.cells.length === 1 && row.cells[0].getAttribute('colspan')) return;
-                    const textId = row.cells[0] ? row.cells[0].textContent.toLowerCase() : '';
-                    const textNama = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
-                    const textProduk = row.cells[2] ? row.cells[2].textContent.toLowerCase() : '';
-                    if (textId.includes(searchTerm) || textNama.includes(searchTerm) || textProduk.includes(searchTerm)) row.style.display = "";
-                    else row.style.display = "none";
-                });
-            });
-        }
+        // === (REMOVED) CLIENT-SIDE SEARCH JS ===
+        // Logika pencarian JS dihapus karena diganti server-side
 
         function updateOrderStatus(orderId, newStatus, statusElement) {
             const originalStatus = statusElement.textContent;
@@ -306,39 +322,29 @@ $result = $conn->query($sql);
                 statusElement.style.opacity = '1';
                 
                 if (data.success) {
-                    // === LOGIKA CERDAS PENGHAPUSAN BARIS (Tanpa Reload) ===
                     let shouldRemove = false;
 
-                    // 1. Jika status jadi "Selesai", HAPUS (karena ini tabel Active Orders)
                     if (newStatus === 'Selesai') {
                         shouldRemove = true;
                     }
-                    // 2. Jika Filter bukan "Semua", dan status baru TIDAK sama dengan filter
-                    // Contoh: Filter "Tertunda", ubah jadi "Proses" -> Hapus
                     else if (currentFilter !== 'all' && currentFilter !== newStatus) {
                         shouldRemove = true;
                     }
 
                     if (shouldRemove) {
-                        // Ambil baris tabel
                         const row = statusElement.closest('tr');
                         if(row) {
-                            // Efek fade out
                             row.style.transition = 'opacity 0.5s';
                             row.style.opacity = '0';
-                            
-                            // Hapus setelah 0.5 detik
                             setTimeout(() => {
                                 row.remove();
-                                // Opsional: Cek jika tabel kosong
                                 const tbody = document.querySelector('#ordersTable tbody');
                                 if (tbody && tbody.rows.length === 0) {
-                                    tbody.innerHTML = `<tr><td colspan='6' style='text-align:center; padding: 3rem; color: #888;'><i class='fas fa-box-open' style='font-size: 2.5rem; margin-bottom: 15px; color: #ddd; display:block;'></i>Tidak ada pesanan untuk filter ini.</td></tr>`;
+                                    window.location.reload(); // Reload agar pagination/pesan kosong benar
                                 }
                             }, 500);
                         }
                     } else {
-                        // HANYA UPDATE TAMPILAN (Jika tidak dihapus)
                         statusElement.textContent = newStatus;
                         statusElement.classList.remove('tertunda', 'proses', 'selesai', 'completed');
                         statusElement.classList.add(newStatus.toLowerCase());
