@@ -65,7 +65,7 @@ $result = $conn->query($sql);
         .confirm-actions { display: flex; justify-content: center; gap: 1rem; }
         
         /* Header & Date Picker */
-        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem;}
         .header-title h3 { margin: 0; font-size: 1.3rem; color: #333; font-weight: 600; }
         .header-subtitle { font-size: 0.9rem; color: #888; margin-top: 4px; }
         .date-picker-wrapper { position: relative; width: 42px; height: 40px; background-color: #9a2020; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.3s; box-shadow: 0 2px 5px rgba(154, 32, 32, 0.2); }
@@ -114,7 +114,7 @@ $result = $conn->query($sql);
                             }
                             ?>
                         </h3>
-                        <div class="header-subtitle">Total Data: <?php echo $total_data; ?></div>
+                        <div class="header-subtitle">Total Riwayat: <?php echo $total_data; ?></div>
                     </div>
 
                     <form id="filterForm" method="GET">

@@ -63,7 +63,7 @@ $result = $conn->query($sql);
     <link rel="stylesheet" href="dashboard.css">
     <style>
         /* Style tambahan */
-        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem;}
         .header-title h3 { margin: 0; font-size: 1.3rem; color: #333; font-weight: 600; }
         .header-subtitle { font-size: 0.9rem; color: #888; margin-top: 4px; }
         
@@ -147,7 +147,7 @@ $result = $conn->query($sql);
                             }
                             ?>
                         </h3>
-                        <div class="header-subtitle">Total Data: <?php echo $total_data; ?></div>
+                        <div class="header-subtitle">Total Pesanan: <?php echo $total_data; ?></div>
                     </div>
                     
                     <form id="filterForm" method="GET" class="filter-group">
