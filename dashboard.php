@@ -19,6 +19,11 @@ $jumlah_proses = $result_proses ? $result_proses->fetch_assoc()['count'] : 0;
 $sql_orders = "SELECT COUNT(*) as count FROM pesanan";
 $result_orders = $conn->query($sql_orders);
 $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
+
+
+$sql_notif = "SELECT COUNT(*) as jumlah_baru FROM pesanan WHERE status = 'Tertunda'";
+$result_notif = $conn->query($sql_notif);
+$badge_count = $result_notif->fetch_assoc()['jumlah_baru'];
 ?>
 
 <!DOCTYPE html>
@@ -60,7 +65,18 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="dashboard.php" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                    <li><a href="pesanan.php"><i class="fas fa-inbox"></i> Pesanan</a></li>
+                    <li>
+                        <a href="pesanan.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'pesanan.php' ? 'active' : ''; ?>">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <i class="fas fa-inbox"></i> 
+                                Pesanan
+                            </div>
+                            
+                            <?php if ($badge_count > 0): ?>
+                                <span class="notification-badge"><?php echo $badge_count; ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </li>
                     <li><a href="riwayat-pesanan.php"><i class="fas fa-history"></i> Riwayat Pesanan</a></li>
                     <li><a href="kelola-produk.php"><i class="fas fa-box-open"></i> Kelola Produk</a></li>
                     <li><a href="kelola-tampilan.php"><i class="fas fa-palette"></i> Kelola Tampilan</a></li>
@@ -137,7 +153,10 @@ $total_orders = $result_orders ? $result_orders->fetch_assoc()['count'] : 0;
                                             <ul class='status-dropdown'></ul>
                                         </div>
                                       </td>";
-                                echo "<td><button class='action-btn detail'>Detail</button></td>";
+                                echo "<td class='action-cell'>
+                                        <button class='action-btn detail' title='Lihat Detail'><i class='fas fa-eye'></i></button>
+                                        <button class='action-btn delete' title='Hapus Pesanan'><i class='fas fa-trash'></i></button>
+                                    </td>";
                                 echo "</tr>";
                             }
                         } else {

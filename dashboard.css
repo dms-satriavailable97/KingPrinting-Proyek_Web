@@ -557,3 +557,97 @@ td:first-child {
 }
 
 .admin-modal-close:hover { color: black; }
+
+/* HANYA Tambahkan Style Badge ini di dashboard.css */
+.notification-badge {
+    background-color: #FFD700; /* Warna Kuning */
+    color: #9a2020;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 12px;
+    
+    /* INI KUNCINYA: */
+    margin-left: auto; /* Otomatis dorong badge ke kanan mentok */
+    
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* --- FIX TOMBOL AKSI (Mata & Sampah) --- */
+.action-cell {
+    display: flex;
+    gap: 8px; /* Jarak antar tombol */
+    justify-content: flex-start; /* Atau center jika ingin di tengah */
+}
+
+.action-btn {
+    width: 38px;           /* Lebar Tetap */
+    height: 38px;          /* Tinggi Tetap (Sama dengan lebar agar kotak) */
+    padding: 0;            /* Hapus padding agar ikon di tengah */
+    border: none;
+    border-radius: 6px;    /* Sudut membulat */
+    display: inline-flex;  /* Flexbox untuk tengahin ikon */
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;       /* Ukuran ikon */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: white;
+}
+
+/* Warna Tombol Detail (Mata) - Abu-abu */
+.action-btn.detail {
+    background-color: #6c757d; 
+}
+.action-btn.detail:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Warna Tombol Hapus (Sampah) - Merah */
+.action-btn.delete {
+    background-color: #dc3545;
+}
+.action-btn.delete:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+}
+
+/* --- PERBAIKAN TABEL AGAR RAPI --- */
+table {
+    width: 100%;
+    border-collapse: collapse; /* Pastikan garis menyatu */
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 15px 12px; /* Memberi jarak napas (atas-bawah 15px, kiri-kanan 12px) */
+    text-align: left;
+    border-bottom: 1px solid #eee; /* Garis pemisah halus */
+    vertical-align: middle; /* KUNCI: Menjaga teks & tombol sejajar vertikal (tengah) */
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+/* Khusus Header Tabel */
+thead th {
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #eee; /* Garis header sedikit lebih tebal */
+    padding-bottom: 15px; /* Jarak ekstra ke garis bawah header */
+}
+
+/* Efek Hover pada Baris */
+tbody tr:hover {
+    background-color: #fcfcfc; /* Highlight tipis saat kursor lewat */
+}

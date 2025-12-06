@@ -2,6 +2,10 @@
 session_start();
 require_once 'config.php';
 
+$sql_notif = "SELECT COUNT(*) as jumlah_baru FROM pesanan WHERE status = 'Tertunda'";
+$result_notif = $conn->query($sql_notif);
+$badge_count = $result_notif->fetch_assoc()['jumlah_baru'];
+
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("location: index.php");
     exit;
@@ -245,7 +249,18 @@ while($row = $result->fetch_assoc()) {
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                    <li><a href="pesanan.php"><i class="fas fa-inbox"></i> Pesanan</a></li>
+                    <li>
+                        <a href="pesanan.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'pesanan.php' ? 'active' : ''; ?>">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <i class="fas fa-inbox"></i> 
+                                Pesanan
+                            </div>
+                            
+                            <?php if ($badge_count > 0): ?>
+                                <span class="notification-badge"><?php echo $badge_count; ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </li>
                     <li><a href="riwayat-pesanan.php"><i class="fas fa-history"></i> Riwayat Pesanan</a></li>
                     <li><a href="kelola-produk.php"><i class="fas fa-box-open"></i> Kelola Produk</a></li>                  
                     <li><a href="kelola-tampilan.php"><i class="fas fa-palette"></i> Kelola Tampilan</a></li>

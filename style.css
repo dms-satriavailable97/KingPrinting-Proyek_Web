@@ -177,6 +177,7 @@ body {
 .hero-content {
     flex: 1;
     padding-right: 2rem;
+    padding-left: 2rem;
 }
 
 .hero-content h1 {
