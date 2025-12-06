@@ -124,7 +124,10 @@ $result = $conn->query($sql);
         .pagination a.active { background-color: #9a2020; color: white; border-color: #9a2020; }
         .pagination span.dots { padding: 0 5px; color: #888; }
 
-        
+        /* Fix garis tabel utuh */
+        table tbody tr { border-bottom: 1px solid #eee; }
+        table tbody tr:last-child { border-bottom: none; }
+        table tbody tr td { border-bottom: 0; }
     </style>
 </head>
 <body>

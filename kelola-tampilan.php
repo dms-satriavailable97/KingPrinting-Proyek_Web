@@ -108,6 +108,27 @@ $badge_count = $result_notif->fetch_assoc()['jumlah_baru'];
             background: #7a1a1a;
             transform: translateY(-2px);
         }
+
+        /* Override action button (Lihat Website) agar lebar normal */
+        .header-right .action-btn {
+            width: auto !important;
+            height: auto !important;
+            padding: 10px 16px !important;
+            border-radius: 8px !important;
+            background: #3b82f6 !important;
+            color: #fff !important;
+            font-weight: 700;
+            font-size: 0.95rem;
+            gap: 8px;
+            box-shadow: 0 6px 16px rgba(59,130,246,0.3);
+        }
+        .header-right .action-btn i {
+            font-size: 0.95rem;
+        }
+        .header-right .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(59,130,246,0.35);
+        }
     </style>
 </head>
 <body>

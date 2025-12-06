@@ -5,6 +5,37 @@
     box-sizing: border-box;
 }
 
+/* Scrollbar transparan (track hilang), hanya thumb abu */
+::-webkit-scrollbar {
+    width: 10px;
+    background: transparent;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    border: none;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #b3b3b3;
+    border-radius: 999px;
+    border: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #9a9a9a;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #b3b3b3 transparent;
+}
+
 :root {
     --primary-yellow: #FFD700;
     --secondary-red: #D32F2F;

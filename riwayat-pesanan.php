@@ -90,6 +90,11 @@ $result = $conn->query($sql);
         .date-icon { color: white; font-size: 1.2rem; pointer-events: none; }
         .invisible-date-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10; }
         .invisible-date-input::-webkit-calendar-picker-indicator { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 0; margin: 0; cursor: pointer; opacity: 0; }
+
+        /* Fix garis tabel utuh */
+        table tbody tr { border-bottom: 1px solid #eee; }
+        table tbody tr:last-child { border-bottom: none; }
+        table tbody tr td { border-bottom: 0; }
     </style>
 </head>
 <body>
@@ -200,7 +205,7 @@ $result = $conn->query($sql);
                                 ? "Tidak ada riwayat yang cocok dengan pencarian Anda."
                                 : "Belum ada riwayat pesanan selesai pada tanggal ini.";
                                 
-                            echo "<tr><td colspan='6' style='text-align:center; padding: 2rem;'>$msg</td></tr>";
+                            echo "<tr><td colspan='6' style='text-align:center; padding: 2rem; color: #888;'>$msg</td></tr>";
                         }
                         $conn->close();
                         ?>

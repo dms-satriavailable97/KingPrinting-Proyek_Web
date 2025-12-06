@@ -11,27 +11,10 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     exit;
 }
 
-// === LOGIKA PROCESS FORM ===
+// === LOGIKA PROCESS FORM (HANYA EDIT) ===
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-    // 1. Tambah Admin Baru
-    if (isset($_POST['add_admin'])) {
-        $username = $conn->real_escape_string(trim($_POST['username']));
-        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        
-        $check = $conn->query("SELECT id FROM admins WHERE username = '$username'");
-        if ($check->num_rows > 0) {
-            $error = "Username sudah digunakan!";
-        } else {
-            $sql = "INSERT INTO admins (username, password) VALUES ('$username', '$password')";
-            if ($conn->query($sql)) {
-                header("Location: kelola-akun.php?status=success_add");
-                exit;
-            }
-        }
-    }
 
-    // 2. Edit Admin (Username & Password + Konfirmasi)
+    // Edit Admin (Username & Password + Konfirmasi)
     if (isset($_POST['update_admin'])) {
         $id = intval($_POST['id']);
         $new_username = $conn->real_escape_string(trim($_POST['username']));
@@ -39,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $new_password = $_POST['new_password'];
         $confirm_password = $_POST['confirm_new_password']; // Ambil input konfirmasi
 
-        // A. Ambil password hash lama di DB untuk verifikasi
+        // Ambil password hash lama di DB untuk verifikasi
         $stmt = $conn->prepare("SELECT password FROM admins WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -47,15 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->fetch();
         $stmt->close();
 
-        // B. Verifikasi Password Lama (Wajib)
+        // Verifikasi Password Lama (Wajib)
         if (password_verify($old_password, $db_password_hash)) {
-            
-            // C. Cek Username Duplikat
+            // Cek Username Duplikat
             $check = $conn->query("SELECT id FROM admins WHERE username = '$new_username' AND id != $id");
             if ($check->num_rows > 0) {
                 $error = "Username '$new_username' sudah digunakan admin lain!";
             } else {
-                // D. Logika Update
+                // Logika Update
                 if (!empty($new_password)) {
                     // Jika password baru diisi, CEK KONFIRMASI DULU
                     if ($new_password === $confirm_password) {
@@ -64,8 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } else {
                         // Jika password baru dan konfirmasi BEDA
                         $error = "Konfirmasi password baru tidak cocok!";
-                        // Stop proses, jangan jalankan query
-                        goto skip_update; 
+                        goto skip_update;
                     }
                 } else {
                     // Jika password baru kosong, update username SAJA
@@ -84,21 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $error = "Password lama salah! Perubahan dibatalkan.";
         }
-        
-        skip_update: // Label untuk skip jika konfirmasi salah
-    }
-
-    // 3. Hapus Admin
-    if (isset($_POST['delete_admin'])) {
-        $id = intval($_POST['delete_admin']);
-        
-        if ($id == $_SESSION['id']) {
-            $error = "Anda tidak dapat menghapus akun Anda sendiri!";
-        } else {
-            $conn->query("DELETE FROM admins WHERE id = $id");
-            header("Location: kelola-akun.php?status=success_delete");
-            exit;
-        }
+        skip_update:
     }
 }
 
@@ -121,9 +88,7 @@ while($row = $result->fetch_assoc()) {
     <link rel="stylesheet" href="dashboard.css">
     <style>
         /* FIX CSS: Box Sizing agar padding tidak membuat lebar berlebih */
-        * {
-            box-sizing: border-box; 
-        }
+        * { box-sizing: border-box; }
 
         /* CSS Khusus Halaman Ini */
         .admin-card-grid {
@@ -143,10 +108,7 @@ while($row = $result->fetch_assoc()) {
             flex-direction: column;
         }
         
-        .admin-card:hover {
-            transform: translateY(-5px);
-            border-color: #9a2020;
-        }
+        .admin-card:hover { transform: translateY(-5px); border-color: #9a2020; }
 
         .admin-avatar {
             width: 50px;
@@ -161,17 +123,8 @@ while($row = $result->fetch_assoc()) {
             margin-bottom: 15px;
         }
 
-        .admin-info h4 {
-            margin: 0 0 5px 0;
-            color: #333;
-            font-size: 1.1rem;
-        }
-
-        .admin-info p {
-            margin: 0;
-            color: #888;
-            font-size: 0.85rem;
-        }
+        .admin-info h4 { margin: 0 0 5px 0; color: #333; font-size: 1.1rem; }
+        .admin-info p { margin: 0; color: #888; font-size: 0.85rem; }
 
         .badge-me {
             background: #e3f2fd;
@@ -203,43 +156,37 @@ while($row = $result->fetch_assoc()) {
 
         .btn-edit { color: #fbc02d; }
         .btn-edit:hover { color: #f9a825; }
-        
-        .btn-delete { color: #ef5350; }
-        .btn-delete:hover { color: #c62828; }
 
         /* Modal Styles */
         .custom-modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(3px); }
-        .custom-modal-content { background: white; margin: 5% auto; width: 90%; max-width: 400px; border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; animation: slideDown 0.3s; }
-        @keyframes slideDown { from {opacity: 0; transform: translateY(-20px);} to {opacity: 1; transform: translateY(0);} }
+        .custom-modal-content {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            margin: 0;
+            animation: slideDown 0.3s;
+        }
+        @keyframes slideDown { from {opacity: 0; transform: translate(-50%, -70%);} to {opacity: 1; transform: translate(-50%, -50%);} }
         
         .close-modal { position: absolute; right: 20px; top: 20px; cursor: pointer; color: #aaa; font-size: 1.5rem; }
         .modal-title { margin: 0 0 20px 0; color: #9a2020; font-size: 1.4rem; border-bottom: 2px solid #f5f5f5; padding-bottom: 10px; }
         
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #555; }
-        
-        /* FIX CSS: Pastikan width 100% tidak nabrak padding */
-        .form-control { 
-            width: 100%; 
-            padding: 10px; 
-            border: 1px solid #ddd; 
-            border-radius: 6px; 
-            font-family: 'Poppins'; 
-            box-sizing: border-box; /* INI KUNCINYA */
-        }
-        
-        .form-text { font-size: 0.8rem; color: #888; margin-top: 3px; display: block; }
-        
+        .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Poppins'; }
         .btn-submit { width: 100%; padding: 12px; background: #9a2020; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
         .btn-submit:hover { background: #7a1a1a; }
 
         .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        
-        .modal-actions { display: flex; gap: 10px; justify-content: center; padding-bottom: 10px; }
-        .btn-cancel { background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; }
-        .btn-confirm-delete { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -276,14 +223,8 @@ while($row = $result->fetch_assoc()) {
             </header>
 
             <!-- Notifikasi -->
-            <?php if (isset($_GET['status']) && $_GET['status'] == 'success_add'): ?>
-                <div class="alert alert-success"><i class="fas fa-check-circle"></i> Admin baru berhasil ditambahkan!</div>
-            <?php endif; ?>
             <?php if (isset($_GET['status']) && $_GET['status'] == 'success_edit'): ?>
                 <div class="alert alert-success"><i class="fas fa-check-circle"></i> Akun berhasil diperbarui!</div>
-            <?php endif; ?>
-            <?php if (isset($_GET['status']) && $_GET['status'] == 'success_delete'): ?>
-                <div class="alert alert-success"><i class="fas fa-check-circle"></i> Akun admin berhasil dihapus!</div>
             <?php endif; ?>
             <?php if (isset($error)): ?>
                 <div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> <?php echo $error; ?></div>
@@ -312,36 +253,11 @@ while($row = $result->fetch_assoc()) {
                         <button class="btn-icon btn-edit" onclick="openEditModal(<?php echo $admin['id']; ?>, '<?php echo $admin['username']; ?>')" title="Edit Akun">
                             <i class="fas fa-edit"></i>
                         </button>
-                        
-                        <?php if($admin['id'] != $_SESSION['id']): ?>
-                            <button class="btn-icon btn-delete" onclick="confirmDelete(<?php echo $admin['id']; ?>, '<?php echo $admin['username']; ?>')" title="Hapus Akun">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endforeach; ?>
             </div>
         </main>
-    </div>
-
-    <!-- Modal Tambah Admin -->
-    <div id="addAdminModal" class="custom-modal">
-        <div class="custom-modal-content">
-            <span class="close-modal" onclick="this.parentElement.parentElement.style.display='none'">&times;</span>
-            <h3 class="modal-title">Tambah Admin Baru</h3>
-            <form method="POST">
-                <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" name="username" class="form-control" required autocomplete="off" placeholder="Contoh: admin2">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" name="password" class="form-control" required autocomplete="new-password" placeholder="Masukkan password">
-                </div>
-                <button type="submit" name="add_admin" class="btn-submit">Simpan Admin</button>
-            </form>
-        </div>
     </div>
 
     <!-- Modal Edit Akun -->
@@ -384,32 +300,11 @@ while($row = $result->fetch_assoc()) {
         </div>
     </div>
 
-    <!-- Modal Hapus -->
-    <div id="deleteModal" class="custom-modal">
-        <div class="custom-modal-content" style="text-align:center; padding-top:30px;">
-            <i class="fas fa-exclamation-circle" style="font-size:3rem; color:#dc3545; margin-bottom:15px;"></i>
-            <h3 style="color:#333; margin:0;">Hapus Admin?</h3>
-            <p style="color:#666; margin:10px 0 25px;">Anda yakin ingin menghapus admin <strong id="deleteUsernameDisplay"></strong>?</p>
-            
-            <form method="POST" class="modal-actions">
-                <input type="hidden" name="delete_admin" id="deleteId">
-                <button type="submit" class="btn-confirm-delete">Ya, Hapus</button>
-                <button type="button" class="btn-cancel" onclick="document.getElementById('deleteModal').style.display='none'">Batal</button>
-            </form>
-        </div>
-    </div>
-
     <script>
         function openEditModal(id, username) {
             document.getElementById('editId').value = id;
             document.getElementById('editUsernameInput').value = username;
             document.getElementById('editAdminModal').style.display = 'block';
-        }
-
-        function confirmDelete(id, username) {
-            document.getElementById('deleteId').value = id;
-            document.getElementById('deleteUsernameDisplay').textContent = username;
-            document.getElementById('deleteModal').style.display = 'block';
         }
 
         window.onclick = function(event) {

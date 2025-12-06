@@ -130,23 +130,61 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         
         .filter-section {
             background: white; padding: 20px; border-radius: 12px; margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; gap: 15px; align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
             border: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            justify-content: space-between;
         }
-        .filter-section select {
+        .filter-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+        }
+        .filter-left label {
+            font-weight: 600;
+            color: #444;
+            white-space: nowrap;
+        }
+        .filter-left select {
             padding: 10px 15px; border-radius: 8px; border: 1px solid #ddd; 
             flex: 1; font-family: 'Poppins', sans-serif; font-size: 14px;
             outline: none; transition: border-color 0.3s;
+            background: #fff;
+        }
+        .filter-left select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        }
+        .btn-add-design {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #3b82f6;
+            color: white;
+            padding: 11px 18px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(59,130,246,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+        }
+        .btn-add-design:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(59,130,246,0.35);
+        }
+        .btn-add-design i {
+            font-size: 13px;
         }
 
         /* --- PERBAIKAN GRID AGAR TIDAK MENGECIL --- */
         .grid-container {
             display: grid;
-            /* KUNCI 1: minmax(250px, 1fr) 
-               Artinya: Kartu minimal lebarnya 250px. 
-               Jika layar sempit, dia turun ke bawah. 
-               Jika layar lebar, dia berjejer. 
-               Tidak akan saling gencet sampai gepeng. */
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
             gap: 25px;
         }
@@ -162,22 +200,19 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         /* --- PERBAIKAN GAMBAR AGAR FULL CONTENT (UTUH) --- */
         .card-img-wrapper {
             width: 100%;
-            height: 220px; /* Tinggi kotak gambar ditetapkan tetap */
-            background-color: #f8f9fa; /* Warna latar abu muda biar rapi kalau gambar beda rasio */
+            height: 220px;
+            background-color: #f8f9fa;
             display: flex;
             align-items: center;
             justify-content: center;
             border-bottom: 1px solid #eee;
-            padding: 10px; /* Jarak napas biar gambar gak nempel pinggir */
+            padding: 10px;
             box-sizing: border-box;
         }
 
         .card-img { 
             width: 100%; 
             height: 100%; 
-            /* KUNCI 2: object-fit: contain 
-               Artinya: Tampilkan SELURUH gambar di dalam kotak ini. 
-               Jangan dicrop/dipotong. */
             object-fit: contain; 
         }
 
@@ -195,7 +230,7 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         .alert-sukses { background:#d4edda; color:#155724; border: 1px solid #c3e6cb; }
         .alert-error { background:#f8d7da; color:#721c24; border: 1px solid #f5c6cb; }
 
-        /* === 2. STYLE MODAL POPUP (YANG BENAR & FIX FONT) === */
+        /* === 2. STYLE MODAL POPUP === */
         .admin-modal {
             display: none; position: fixed; z-index: 2000; left: 0; top: 0;
             width: 100%; height: 100%; overflow: hidden;
@@ -271,16 +306,18 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             <?php endif; ?>
 
             <div class="filter-section">
-                <label>Kategori Produk:</label>
-                <select onchange="window.location.href='kelola-produk.php?kategori=' + encodeURIComponent(this.value)">
-                    <?php foreach ($kategori_list as $kat): ?>
-                        <option value="<?= $kat ?>" <?= $filter_kategori == $kat ? 'selected' : '' ?>>
-                            <?= $kat ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <div class="filter-left">
+                    <label>Kategori Produk:</label>
+                    <select onchange="window.location.href='kelola-produk.php?kategori=' + encodeURIComponent(this.value)">
+                        <?php foreach ($kategori_list as $kat): ?>
+                            <option value="<?= $kat ?>" <?= $filter_kategori == $kat ? 'selected' : '' ?>>
+                                <?= $kat ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
-                <button class="action-btn process" onclick="document.getElementById('modalTambah').style.display='block'">
+                <button class="btn-add-design" onclick="document.getElementById('modalTambah').style.display='block'">
                     <i class="fas fa-plus"></i> Tambah Desain
                 </button>
             </div>

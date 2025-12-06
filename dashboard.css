@@ -281,8 +281,19 @@ th, td {
     vertical-align: middle;
 }
 
+/* FIX: pastikan garis pemisah baris tabel utuh di seluruh lebar */
+table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+}
+table tbody tr:last-child {
+    border-bottom: none;
+}
+table tbody tr td {
+    border-bottom: 0;
+}
+
 /* Ellipsis untuk Nama & Produk di Tabel */
-table td:nth-child(2), 
+table td:nth-child(2),
 table td:nth-child(3) {
     white-space: nowrap;
     overflow: hidden;
@@ -292,7 +303,7 @@ table td:nth-child(3) {
 /* Pastikan Dropdown Status Tidak Terpotong */
 table td:nth-child(5),
 table td:nth-child(6) {
-    overflow: visible; 
+    overflow: visible;
 }
 
 th {
@@ -300,6 +311,9 @@ th {
     font-weight: 500;
     text-transform: uppercase;
     font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 15px;
 }
 
 td:first-child {
@@ -630,7 +644,7 @@ table {
 th, td {
     padding: 15px 12px; /* Memberi jarak napas (atas-bawah 15px, kiri-kanan 12px) */
     text-align: left;
-    border-bottom: 1px solid #eee; /* Garis pemisah halus */
+    border-bottom: 1px solid var(--border-color); /* Garis pemisah halus */
     vertical-align: middle; /* KUNCI: Menjaga teks & tombol sejajar vertikal (tengah) */
     font-size: 0.95rem;
     color: var(--text-primary);
@@ -643,7 +657,7 @@ thead th {
     text-transform: uppercase;
     font-size: 0.8rem;
     letter-spacing: 0.5px;
-    border-bottom: 2px solid #eee; /* Garis header sedikit lebih tebal */
+    border-bottom: 2px solid var(--border-color); /* Garis header sedikit lebih tebal */
     padding-bottom: 15px; /* Jarak ekstra ke garis bawah header */
 }
 
