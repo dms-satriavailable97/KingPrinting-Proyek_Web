@@ -296,6 +296,103 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 0.7rem;
             font-family: 'Poppins', sans-serif;
         }
+
+        /* === MODAL STYLES === */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            animation: fadeIn 0.3s;
+        }
+
+        .custom-modal-content {
+            background-color: #fefefe;
+            padding: 25px 35px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-top: 5px solid #dc3545;
+            animation: slideIn 0.3s;
+        }
+
+        .confirm-icon {
+            font-size: 3rem;
+            color: #dc3545;
+            margin-bottom: 1rem;
+        }
+
+        .custom-modal h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .custom-modal p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .confirm-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .btn-confirm-yes {
+            background-color: #dc3545;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .btn-confirm-yes:hover {
+            background-color: #c82333;
+        }
+
+        .btn-confirm-no {
+            background-color: #e9ecef;
+            color: #333;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .btn-confirm-no:hover {
+            background-color: #dee2e6;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translate(-50%, -60%); opacity: 0; }
+            to { transform: translate(-50%, -50%); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -367,14 +464,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             value="<?php echo $feature['sort_order']; ?>" min="1" style="width: 60px;">
                                     </span>
                                     
-                                    <!-- FORM TERPISAH UNTUK DELETE -->
-                                    <form method="POST" style="display: inline;">
-                                        <button type="submit" name="delete_feature" class="btn btn-danger" 
-                                                onclick="return confirm('Hapus keunggulan ini?')">
-                                            <i class="fas fa-trash"></i> Hapus
-                                        </button>
-                                        <input type="hidden" name="feature_id" value="<?php echo $feature['id']; ?>">
-                                    </form>
+                                    <!-- TOMBOL HAPUS DENGAN TRIGGER MODAL -->
+                                    <button type="button" class="btn btn-danger delete-btn" 
+                                            data-id="<?php echo $feature['id']; ?>">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -391,6 +485,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
+    <!-- Hidden form untuk delete action -->
+    <form id="deleteForm" method="POST" style="display:none;">
+        <input type="hidden" name="feature_id" id="deleteFeatureId">
+        <input type="hidden" name="delete_feature" value="1">
+    </form>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="deleteModal" class="custom-modal">
+        <div class="custom-modal-content">
+            <div class="confirm-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3>Hapus Keunggulan?</h3>
+            <p>Keunggulan ini akan dihapus secara permanen. Anda yakin ingin melanjutkan?</p>
+            <div class="confirm-actions">
+                <button id="confirmDelete" class="btn-confirm-yes">Ya, Hapus</button>
+                <button id="cancelDelete" class="btn-confirm-no">Batal</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Icon Picker
         document.querySelectorAll('.icon-option').forEach(option => {
@@ -398,6 +513,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 document.querySelectorAll('.icon-option').forEach(opt => opt.classList.remove('selected'));
                 this.classList.add('selected');
                 document.getElementById('selected_icon').value = this.dataset.icon;
+            });
+        });
+
+        // Modal Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            const deleteModal = document.getElementById('deleteModal');
+            const confirmBtn = document.getElementById('confirmDelete');
+            const cancelBtn = document.getElementById('cancelDelete');
+            const deleteForm = document.getElementById('deleteForm');
+            const deleteInput = document.getElementById('deleteFeatureId');
+
+            let idToDelete = null;
+
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    idToDelete = this.getAttribute('data-id');
+                    deleteModal.style.display = 'block';
+                });
+            });
+
+            confirmBtn.addEventListener('click', function() {
+                if (idToDelete) {
+                    deleteInput.value = idToDelete;
+                    deleteForm.submit();
+                }
+            });
+
+            cancelBtn.addEventListener('click', function() {
+                deleteModal.style.display = 'none';
+                idToDelete = null;
+            });
+
+            window.addEventListener('click', function(e) {
+                if (e.target == deleteModal) {
+                    deleteModal.style.display = 'none';
+                    idToDelete = null;
+                }
             });
         });
     </script>

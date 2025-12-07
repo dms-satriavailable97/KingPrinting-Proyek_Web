@@ -80,8 +80,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     
+    // Proses Delete (Sekarang ditangani via Modal Form terpisah)
     if (isset($_POST['delete_slide'])) {
         $slide_id = intval($_POST['slide_id']);
+        
+        // (Opsional) Hapus file gambar fisik jika perlu
+        // $q = $conn->query("SELECT image_path FROM website_hero_slides WHERE id = $slide_id");
+        // if($r = $q->fetch_assoc()) { if(file_exists($r['image_path'])) unlink($r['image_path']); }
+
         $conn->query("DELETE FROM website_hero_slides WHERE id = $slide_id");
         $success = "Slide berhasil dihapus!";
         header("Location: kelola-hero.php");
@@ -230,6 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 5px;
             overflow: hidden;
             flex-shrink: 0;
+            border: 1px solid #ddd;
         }
 
         .slide-preview img {
@@ -281,6 +288,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-top: 0.3rem;
             font-family: 'Poppins', sans-serif;
         }
+
+        /* === STYLES UNTUK MODAL KONFIRMASI (BARU) === */
+        .custom-modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 9999; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.5); 
+            backdrop-filter: blur(3px); 
+            animation: fadeIn 0.2s ease-out; 
+        }
+        .custom-modal-content { 
+            background-color: #fff; 
+            position: absolute; /* Kunci untuk centering */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center horizontal & vertical */
+            padding: 0; 
+            border-radius: 12px; 
+            width: 90%; 
+            max-width: 400px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            border-top: 6px solid #9a2020; 
+            animation: slideIn 0.3s ease-out; 
+        }
+        .custom-modal-header { padding: 25px 20px 10px; text-align: center; }
+        .custom-modal-icon { font-size: 3rem; color: #dc3545; margin-bottom: 15px; }
+        .custom-modal-title { font-size: 1.4rem; font-weight: 600; color: #333; margin: 0; }
+        .custom-modal-body { padding: 10px 25px 25px; text-align: center; color: #666; font-size: 0.95rem; line-height: 1.6; }
+        .custom-modal-footer { 
+            padding: 20px; 
+            background: #f9f9f9; 
+            border-top: 1px solid #eee; 
+            border-radius: 0 0 12px 12px; 
+            display: flex; 
+            justify-content: center; 
+            gap: 15px; 
+        }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translate(-50%, -70%); opacity: 0; } to { transform: translate(-50%, -50%); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -363,14 +416,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             value="<?php echo $slide['sort_order']; ?>" min="1" style="width: 60px;">
                                     </span>
                                     
-                                    <!-- FORM TERPISAH UNTUK DELETE -->
-                                    <form method="POST" style="display: inline;">
-                                        <button type="submit" name="delete_slide" class="btn btn-danger" 
-                                                onclick="return confirm('Hapus slide ini?')">
-                                            <i class="fas fa-trash"></i> Hapus
-                                        </button>
-                                        <input type="hidden" name="slide_id" value="<?php echo $slide['id']; ?>">
-                                    </form>
+                                    <!-- TOMBOL HAPUS DENGAN TRIGGER MODAL -->
+                                    <button type="button" class="btn btn-danger delete-trigger" 
+                                            data-id="<?php echo $slide['id']; ?>">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -386,5 +436,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
         </div>
     </div>
+
+    <!-- MODAL CONFIRM HAPUS (POPUP TENGAH LAYAR) -->
+    <div id="deleteModal" class="custom-modal">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <div class="custom-modal-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="custom-modal-title">Konfirmasi Hapus</h3>
+            </div>
+            <div class="custom-modal-body">
+                <p>Apakah Anda yakin ingin menghapus slide ini? <br>Gambar akan hilang dari tampilan website.</p>
+            </div>
+            <div class="custom-modal-footer">
+                <button id="confirmDeleteBtn" class="btn btn-danger">Ya, Hapus</button>
+                <button id="cancelDeleteBtn" class="btn btn-secondary">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORM TERSEMBUNYI UNTUK HANDLE DELETE -->
+    <form id="deleteForm" method="POST" style="display: none;">
+        <input type="hidden" name="delete_slide" value="1">
+        <input type="hidden" name="slide_id" id="modalSlideId">
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('deleteModal');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            const cancelBtn = document.getElementById('cancelDeleteBtn');
+            const deleteForm = document.getElementById('deleteForm');
+            const slideIdInput = document.getElementById('modalSlideId');
+            
+            // Logic Trigger Modal
+            document.querySelectorAll('.delete-trigger').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const slideId = this.getAttribute('data-id');
+                    slideIdInput.value = slideId; // Set ID ke form hidden
+                    modal.style.display = 'block'; // Tampilkan modal
+                });
+            });
+
+            // Logic Tombol Batal
+            cancelBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+                slideIdInput.value = '';
+            });
+
+            // Logic Klik Luar Modal untuk Tutup
+            window.addEventListener('click', function(e) {
+                if (e.target == modal) {
+                    modal.style.display = 'none';
+                    slideIdInput.value = '';
+                }
+            });
+
+            // Logic Konfirmasi Hapus
+            confirmBtn.addEventListener('click', function() {
+                if(slideIdInput.value) {
+                    deleteForm.submit(); // Submit form hidden
+                }
+            });
+        });
+    </script>
 </body>
 </html>

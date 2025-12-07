@@ -120,7 +120,6 @@ if(orderForm) {
         orderModal.style.display = 'none';
         document.body.style.overflow = 'auto';
         
-        alert('Terima kasih! Pesanan Anda sedang kami proses. Silakan lanjutkan konfirmasi di WhatsApp.');
     });
 }
 

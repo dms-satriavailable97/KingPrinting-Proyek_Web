@@ -1,0 +1,17 @@
+Options -Indexes
+
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<FilesMatch "\.(sql|log|ini|env)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>

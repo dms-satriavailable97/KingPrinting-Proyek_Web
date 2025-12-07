@@ -270,6 +270,51 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             position:absolute; right:20px; top:15px; font-size:24px; color:#aaa; cursor:pointer;
         }
         .close-modal:hover { color:#d32f2f; }
+
+        /* === 3. STYLE MODAL CONFIRM DELETE === */
+        #modalConfirmDelete .admin-modal-content {
+            max-width: 400px;
+            text-align: center;
+        }
+        .confirm-icon {
+            font-size: 3rem;
+            color: #c62828;
+            margin-bottom: 15px;
+        }
+        .confirm-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .btn-confirm-yes {
+            background-color: #c62828;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn-confirm-yes:hover {
+            background-color: #b71c1c;
+        }
+        .btn-confirm-no {
+            background-color: #e0e0e0;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-confirm-no:hover {
+            background-color: #d6d6d6;
+        }
+
     </style>
 </head>
 <body>
@@ -347,11 +392,10 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             onclick="bukaModalEdit(<?= $d['id'] ?>, '<?= htmlspecialchars(addslashes($d['caption'])) ?>')">
                                         <i class="fas fa-edit"></i> Edit
                                     </button>
-                                    <a href="?kategori=<?= urlencode($filter_kategori) ?>&hapus=<?= $d['id'] ?>" 
-                                       class="btn-action btn-delete" 
-                                       onclick="return confirm('Hapus permanen?')">
+                                    <button class="btn-action btn-delete" 
+                                            onclick="bukaModalDelete(<?= $d['id'] ?>)">
                                        <i class="fas fa-trash"></i> Hapus
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -406,12 +450,35 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 
+    <!-- MODAL CONFIRM DELETE -->
+    <div id="modalConfirmDelete" class="admin-modal">
+        <div class="admin-modal-content">
+            <div class="confirm-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3>Konfirmasi Hapus</h3>
+            <p>Apakah Anda yakin ingin menghapus desain ini secara permanen?</p>
+            <div class="confirm-actions">
+                <a href="#" id="btnConfirmYes" class="btn-confirm-yes">Ya, Hapus</a>
+                <button onclick="document.getElementById('modalConfirmDelete').style.display='none'" class="btn-confirm-no">Batal</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Modal Edit
         function bukaModalEdit(id, caption) {
             document.getElementById('edit_id').value = id;
             document.getElementById('edit_caption').value = caption;
             document.getElementById('modalEdit').style.display = 'block';
         }
+
+        // Modal Confirm Delete
+        function bukaModalDelete(id) {
+            const kategori = "<?= urlencode($filter_kategori) ?>";
+            const deleteUrl = "?kategori=" + kategori + "&hapus=" + id;
+            document.getElementById('btnConfirmYes').href = deleteUrl;
+            document.getElementById('modalConfirmDelete').style.display = 'block';
+        }
+
         window.onclick = function(event) {
             if (event.target.classList.contains('admin-modal')) {
                 event.target.style.display = "none";
