@@ -1332,8 +1332,7 @@ section {
 /* Desktop refinement: ≥1025px */
 @media (min-width: 1025px) {
     .container {
-        width: 88%;
-        max-width: 1240px;
+        width: clamp(1100px, 88vw, 1240px);
     }
     .header .container {
         padding: 0 0.5rem;
@@ -1356,10 +1355,24 @@ section {
     .hero-content p {
         font-size: 1.18rem;
     }
+    .hero-image {
+        max-width: 620px;
+        min-width: 380px;
+    }
     .hero-image .swiper-slide img {
         height: 440px;
     }
+    .produk-grid,
+    .steps,
+    .keunggulan-grid {
+        grid-auto-rows: 1fr;
+    }
+    .produk-item,
+    .step,
+    .keunggulan-item {
+        min-height: 100%;
+    }
     .produk-grid {
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }
 }
