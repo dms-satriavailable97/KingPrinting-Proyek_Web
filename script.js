@@ -110,7 +110,7 @@ if(orderForm) {
                        `Saya ingin mengetahui harga dan estimasi pengerjaannya. Terima kasih.`;
         
         const encodedMessage = encodeURIComponent(message);
-        const whatsappNumber = '628997800507';
+        const whatsappNumber = '6288705844251';
         const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
         
         window.open(whatsappURL, '_blank');
