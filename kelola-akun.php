@@ -191,7 +191,10 @@ while($row = $result->fetch_assoc()) {
 </head>
 <body>
     <div class="dashboard-container">
-        <aside class="sidebar">
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header"><i class="fas fa-crown"></i><h2>King Printing</h2></div>
             <nav class="sidebar-nav">
                 <ul>
@@ -219,7 +222,10 @@ while($row = $result->fetch_assoc()) {
 
         <main class="main-content">
             <header class="main-header">
-                <div class="header-left"><h3>Kelola Akun</h3></div>
+                <div class="header-left" style="display:flex; align-items:center;">
+                    <i class="fas fa-bars mobile-header-toggle" id="mobileMenuToggle"></i>
+                    <h3>Kelola Akun</h3>
+                </div>
             </header>
 
             <!-- Notifikasi -->
@@ -311,6 +317,23 @@ while($row = $result->fetch_assoc()) {
             if (event.target.classList.contains('custom-modal')) {
                 event.target.style.display = "none";
             }
+        }
+        
+        // --- Sidebar Logic ---
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if(mobileMenuToggle && sidebar && sidebarOverlay) {
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+            });
+
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
         }
     </script>
 </body>

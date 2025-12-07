@@ -82,7 +82,7 @@ $result = $conn->query($sql);
         .confirm-actions { display: flex; justify-content: center; gap: 1rem; }
         
         /* Header & Date Picker */
-        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
         .header-title h3 { margin: 0; font-size: 1.3rem; color: #333; font-weight: 600; }
         .header-subtitle { font-size: 0.9rem; color: #888; margin-top: 4px; }
         .date-picker-wrapper { position: relative; width: 42px; height: 40px; background-color: #9a2020; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.3s; box-shadow: 0 2px 5px rgba(154, 32, 32, 0.2); }
@@ -99,7 +99,10 @@ $result = $conn->query($sql);
 </head>
 <body>
     <div class="dashboard-container">
-        <aside class="sidebar">
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header"><i class="fas fa-crown"></i><h2>King Printing</h2></div>
             <nav class="sidebar-nav">
                 <ul>
@@ -126,7 +129,10 @@ $result = $conn->query($sql);
         </aside>
         <main class="main-content">
             <header class="main-header">
-                <div class="header-left"><h3>Riwayat Pesanan Selesai</h3></div>
+                <div class="header-left" style="display:flex; align-items:center;">
+                    <i class="fas fa-bars mobile-header-toggle" id="mobileMenuToggle"></i>
+                    <h3>Riwayat Pesanan Selesai</h3>
+                </div>
                 <div class="header-right">
                     <!-- SEARCH FORM UPDATE -->
                     <form method="GET" action="" class="search-box">
@@ -170,47 +176,49 @@ $result = $conn->query($sql);
                     </form>
                 </div>
 
-                <table id="historyTable">
-                    <thead>
-                        <tr>
-                            <th>ID Pesanan</th>
-                            <th>Nama Pemesan</th>
-                            <th>Produk</th>
-                            <th>Tanggal Masuk</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        if ($result->num_rows > 0) {
-                            while($row = $result->fetch_assoc()) {
-                                $nama_aman = htmlspecialchars($row['nama_pemesan']);
-                                $produk_aman = htmlspecialchars($row['produk']);
+                <div class="table-responsive">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>ID Pesanan</th>
+                                <th>Nama Pemesan</th>
+                                <th>Produk</th>
+                                <th>Tanggal Masuk</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            if ($result->num_rows > 0) {
+                                while($row = $result->fetch_assoc()) {
+                                    $nama_aman = htmlspecialchars($row['nama_pemesan']);
+                                    $produk_aman = htmlspecialchars($row['produk']);
 
-                                echo "<tr data-id='" . $row['id'] . "'>";
-                                echo "<td>#KP" . str_pad($row['id'], 3, '0', STR_PAD_LEFT) . "</td>";
-                                echo "<td title='$nama_aman'>" . $nama_aman . "</td>";
-                                echo "<td title='$produk_aman'>" . $produk_aman . "</td>";
-                                echo "<td>" . date('d M Y, H:i', strtotime($row['tanggal_masuk'])) . "</td>";
-                                echo "<td><span class='status completed'>" . htmlspecialchars($row['status']) . "</span></td>";
-                                echo "<td class='action-cell'>
-                                        <button class='action-btn detail' title='Lihat Detail'><i class='fas fa-eye'></i></button>
-                                        <button class='action-btn delete' title='Hapus Pesanan'><i class='fas fa-trash'></i></button>
-                                    </td>";
-                                echo "</tr>";
+                                    echo "<tr data-id='" . $row['id'] . "'>";
+                                    echo "<td>#KP" . str_pad($row['id'], 3, '0', STR_PAD_LEFT) . "</td>";
+                                    echo "<td title='$nama_aman'>" . $nama_aman . "</td>";
+                                    echo "<td title='$produk_aman'>" . $produk_aman . "</td>";
+                                    echo "<td>" . date('d M Y, H:i', strtotime($row['tanggal_masuk'])) . "</td>";
+                                    echo "<td><span class='status completed'>" . htmlspecialchars($row['status']) . "</span></td>";
+                                    echo "<td class='action-cell'>
+                                            <button class='action-btn detail' title='Lihat Detail'><i class='fas fa-eye'></i></button>
+                                            <button class='action-btn delete' title='Hapus Pesanan'><i class='fas fa-trash'></i></button>
+                                        </td>";
+                                    echo "</tr>";
+                                }
+                            } else {
+                                $msg = !empty($search_query) 
+                                    ? "Tidak ada riwayat yang cocok dengan pencarian Anda."
+                                    : "Belum ada riwayat pesanan selesai pada tanggal ini.";
+                                    
+                                echo "<tr><td colspan='6' style='text-align:center; padding: 2rem; color: #888;'>$msg</td></tr>";
                             }
-                        } else {
-                            $msg = !empty($search_query) 
-                                ? "Tidak ada riwayat yang cocok dengan pencarian Anda."
-                                : "Belum ada riwayat pesanan selesai pada tanggal ini.";
-                                
-                            echo "<tr><td colspan='6' style='text-align:center; padding: 2rem; color: #888;'>$msg</td></tr>";
-                        }
-                        $conn->close();
-                        ?>
-                    </tbody>
-                </table>
+                            $conn->close();
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
 
                 <?php if ($total_pages > 1): ?>
                 <div class="pagination">
@@ -258,6 +266,24 @@ $result = $conn->query($sql);
     
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // --- Sidebar Logic ---
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if(mobileMenuToggle && sidebar && sidebarOverlay) {
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+            });
+
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
+        }
+        // ---------------------
+
         const table = document.getElementById('historyTable');
         const detailModal = document.getElementById('detailModal');
         const confirmDeleteModal = document.getElementById('confirmDeleteModal');
@@ -265,9 +291,6 @@ $result = $conn->query($sql);
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         let orderIdToDelete = null;
-
-        // === (REMOVED) CLIENT-SIDE SEARCH JS ===
-        // Script pencarian JS dihapus
 
         function executeDelete(orderId) {
             const formData = new FormData();

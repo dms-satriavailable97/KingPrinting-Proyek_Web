@@ -13,7 +13,7 @@ $badge_count = $result_notif->fetch_assoc()['jumlah_baru'];
 // === KONFIGURASI FILTER & PENCARIAN ===
 $search_query = isset($_GET['q']) ? trim($conn->real_escape_string($_GET['q'])) : '';
 $filter_date = isset($_GET['date']) && !empty($_GET['date']) ? $_GET['date'] : date('Y-m-d');
-$filter_status = isset($_GET['status_filter']) && !empty($_GET['status_filter']) ? $_GET['status_filter'] : 'all';
+$filter_status = isset($_GET['status_filter']) && !empty($_GET['status_filter']) ?  $_GET['status_filter'] : 'all';
 
 // === PAGINATION CONFIG ===
 $limit = 10;
@@ -23,16 +23,12 @@ if ($page < 1) $page = 1;
 // === QUERY WHERE CLAUSE ===
 $where_clauses = [];
 
-// 1. Logika Pencarian Global (Mengabaikan Tanggal jika ada search)
-if (!empty($search_query)) {
-    // Cari berdasarkan ID, Nama, atau Produk
+if (! empty($search_query)) {
     $where_clauses[] = "(id LIKE '%$search_query%' OR nama_pemesan LIKE '%$search_query%' OR produk LIKE '%$search_query%')";
 } else {
-    // Jika TIDAK mencari, gunakan filter tanggal
     $where_clauses[] = "DATE(tanggal_masuk) = '$filter_date'";
 }
 
-// 2. Logika Status (Tetap berlaku meski sedang mencari)
 if ($filter_status === 'Tertunda') $where_clauses[] = "status = 'Tertunda'";
 elseif ($filter_status === 'Proses') $where_clauses[] = "status = 'Proses'";
 elseif ($filter_status === 'all') $where_clauses[] = "status IN ('Tertunda', 'Proses')";
@@ -78,13 +74,12 @@ $result = $conn->query($sql);
     <link rel="stylesheet" href="dashboard.css">
     <style>
         /* Style tambahan */
-        /* PERBAIKAN CSS: Menghapus border-bottom */
-        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
         
         .header-title h3 { margin: 0; font-size: 1.3rem; color: #333; font-weight: 600; }
         .header-subtitle { font-size: 0.9rem; color: #888; margin-top: 4px; }
         
-        .filter-group { display: flex; gap: 10px; align-items: center; }
+        .filter-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .custom-select { padding: 0 15px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #fff; font-family: 'Poppins', sans-serif; color: #555; cursor: pointer; font-size: 0.9rem; height: 40px; outline: none; }
         .custom-select:hover { border-color: #bbb; }
 
@@ -114,25 +109,17 @@ $result = $conn->query($sql);
         .detail-item strong { display: block; color: #888; font-weight: 500; margin-bottom: 4px; font-size: 0.85rem; }
         .detail-item span { color: #333; font-weight: 500; }
         .detail-item.full-width { grid-column: 1 / -1; }
-        .detail-item textarea { width: 100%; height: 100px; background: #f9f9f9; border: 1px solid #eee; border-radius: 5px; padding: 10px; resize: vertical; font-family: 'Poppins', sans-serif; }
+        .detail-item textarea { width: 100%; height: 100px; background: #f9f9f9; border: 1px solid #eee; border-radius: 5px; padding: 10px; font-family: 'Poppins', sans-serif; resize: vertical; }
         .confirm-modal-content { max-width: 420px; text-align: center; }
         .confirm-actions { display: flex; justify-content: center; gap: 1rem; }
-        
-        /* Pagination */
-        .pagination { display: flex; justify-content: center; margin-top: 20px; gap: 5px; align-items: center; }
-        .pagination a { padding: 8px 12px; border: 1px solid #ddd; color: #333; text-decoration: none; border-radius: 5px; }
-        .pagination a.active { background-color: #9a2020; color: white; border-color: #9a2020; }
-        .pagination span.dots { padding: 0 5px; color: #888; }
-
-        /* Fix garis tabel utuh */
-        table tbody tr { border-bottom: 1px solid #eee; }
-        table tbody tr:last-child { border-bottom: none; }
-        table tbody tr td { border-bottom: 0; }
     </style>
 </head>
 <body>
     <div class="dashboard-container">
-        <aside class="sidebar">
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header"><i class="fas fa-crown"></i><h2>King Printing</h2></div>
             <nav class="sidebar-nav">
                 <ul>
@@ -157,11 +144,14 @@ $result = $conn->query($sql);
             </nav>
             <div class="sidebar-footer"><a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
         </aside>
+        
         <main class="main-content">
             <header class="main-header">
-                <div class="header-left"><h3>Pesanan Aktif</h3></div>
+                <div class="header-left" style="display:flex; align-items:center;">
+                    <i class="fas fa-bars mobile-header-toggle" id="mobileMenuToggle"></i>
+                    <h3>Daftar Pesanan</h3>
+                </div>
                 <div class="header-right">
-                    <!-- SEARCH FORM UPDATE -->
                     <form method="GET" action="" class="search-box">
                         <i class="fas fa-search"></i>
                         <input type="text" name="q" id="searchInput" 
@@ -178,29 +168,30 @@ $result = $conn->query($sql);
                             <?php 
                             if (!empty($search_query)) {
                                 echo "Hasil Pencarian: \"" . htmlspecialchars($search_query) . "\"";
-                            } elseif ($filter_date == date('Y-m-d')) {
+                            } elseif($filter_date == date('Y-m-d')) {
                                 echo "Pesanan Hari Ini";
                             } else {
                                 echo "Pesanan Tanggal " . date('d M Y', strtotime($filter_date));
                             }
                             ?>
                         </h3>
-                        <div class="header-subtitle">Total Pesanan: <?php echo $total_data; ?></div>
+                        <div class="header-subtitle">Total Data: <?php echo $total_data; ?></div>
                     </div>
-                    
+
                     <form id="filterForm" method="GET" class="filter-group">
-                        <!-- Simpan query search jika ada saat filter diubah -->
+                        <!-- Simpan query search agar tidak hilang jika datepicker/dropdown disentuh -->
                         <?php if(!empty($search_query)): ?>
                             <input type="hidden" name="q" value="<?php echo htmlspecialchars($search_query); ?>">
                         <?php endif; ?>
 
+                        <!-- Filter Status -->
                         <select name="status_filter" class="custom-select" onchange="document.getElementById('filterForm').submit()">
                             <option value="all" <?php echo $filter_status == 'all' ? 'selected' : ''; ?>>Semua Status</option>
                             <option value="Tertunda" <?php echo $filter_status == 'Tertunda' ? 'selected' : ''; ?>>Tertunda</option>
                             <option value="Proses" <?php echo $filter_status == 'Proses' ? 'selected' : ''; ?>>Proses</option>
                         </select>
 
-                        <!-- Jika mode pencarian aktif, datepicker opsional/dinonaktifkan visualnya, tapi tetap bisa dipakai untuk reset -->
+                        <!-- Date Picker -->
                         <div class="date-picker-wrapper" title="Pilih Tanggal">
                             <i class="fas fa-calendar-alt date-icon"></i>
                             <input type="date" name="date" class="invisible-date-input" 
@@ -210,60 +201,57 @@ $result = $conn->query($sql);
                     </form>
                 </div>
 
-                <table id="ordersTable">
-                    <thead>
-                        <tr>
-                            <th>ID Pesanan</th>
-                            <th>Nama Pemesan</th>
-                            <th>Produk</th>
-                            <th>Tanggal Masuk</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        if ($result->num_rows > 0) {
-                            while($row = $result->fetch_assoc()) {
-                                $status = htmlspecialchars($row['status']);
-                                $status_class = strtolower($status);
-                                
-                                $nama_aman = htmlspecialchars($row['nama_pemesan']);
-                                $produk_aman = htmlspecialchars($row['produk']);
+                <div class="table-responsive">
+                    <table id="pesananTable">
+                        <thead>
+                            <tr>
+                                <th>ID Pesanan</th>
+                                <th>Nama Pemesan</th>
+                                <th>Produk</th>
+                                <th>Tanggal Masuk</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            if ($result->num_rows > 0) {
+                                while($row = $result->fetch_assoc()) {
+                                    $status = htmlspecialchars($row['status']);
+                                    $status_class = strtolower($status);
+                                    
+                                    $nama_aman = htmlspecialchars($row['nama_pemesan']);
+                                    $produk_aman = htmlspecialchars($row['produk']);
 
-                                echo "<tr data-id='" . $row['id'] . "'>";
-                                echo "<td>#KP" . str_pad($row['id'], 3, '0', STR_PAD_LEFT) . "</td>";
-                                echo "<td title='$nama_aman'>" . $nama_aman . "</td>";
-                                echo "<td title='$produk_aman'>" . $produk_aman . "</td>";
-                                echo "<td>" . date('d M Y, H:i', strtotime($row['tanggal_masuk'])) . "</td>";
-                                echo "<td>
-                                        <div class='status-wrapper'>
-                                            <span class='status interactive " . $status_class . "' data-current-status='" . $status . "'>" . $status . "</span>
-                                            <ul class='status-dropdown'></ul>
-                                        </div>
-                                      </td>";
-                                echo "<td class='action-cell'>
-                                        <button class='action-btn detail' title='Lihat Detail'><i class='fas fa-eye'></i></button>
-                                        <button class='action-btn delete' title='Hapus Pesanan'><i class='fas fa-trash'></i></button>
-                                    </td>";
-                                echo "</tr>";
+                                    echo "<tr data-id='" . $row['id'] . "'>";
+                                    echo "<td>#KP" . str_pad($row['id'], 3, '0', STR_PAD_LEFT) . "</td>";
+                                    echo "<td title='$nama_aman'>" . $nama_aman . "</td>";
+                                    echo "<td title='$produk_aman'>" . $produk_aman . "</td>";
+                                    echo "<td>" . date('d M Y, H:i', strtotime($row['tanggal_masuk'])) . "</td>";
+                                    echo "<td>
+                                            <div class='status-wrapper'>
+                                                <span class='status interactive " . $status_class . "' data-current-status='" . $status . "'>" . $status . "</span>
+                                                <ul class='status-dropdown'></ul>
+                                            </div>
+                                          </td>";
+                                    echo "<td class='action-cell'>
+                                            <button class='action-btn detail' title='Lihat Detail'><i class='fas fa-eye'></i></button>
+                                            <button class='action-btn delete' title='Hapus Pesanan'><i class='fas fa-trash'></i></button>
+                                        </td>";
+                                    echo "</tr>";
+                                }
+                            } else {
+                                $msg = !empty($search_query) 
+                                    ? "Tidak ada pesanan yang cocok dengan pencarian Anda."
+                                    : "Belum ada pesanan masuk pada tanggal ini.";
+                                    
+                                echo "<tr><td colspan='6' style='text-align:center; padding: 2rem; color: #888;'>$msg</td></tr>";
                             }
-                        } else {
-                            $msg = !empty($search_query) 
-                                ? "Tidak ada pesanan yang cocok dengan pencarian Anda."
-                                : "Tidak ada pesanan untuk filter ini.";
-                            
-                            echo "<tr><td colspan='6' style='text-align:center; padding: 3rem; color: #888;'>
-                                    <i class='fas fa-box-open' style='font-size: 2.5rem; margin-bottom: 15px; color: #ddd; display:block;'></i>
-                                    $msg
-                                  </td></tr>";
-                        }
-                        $conn->close();
-                        ?>
-                    </tbody>
-                </table>
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
 
-                <!-- Pagination -->
                 <?php if ($total_pages > 1): ?>
                 <div class="pagination">
                     <?php
@@ -285,7 +273,7 @@ $result = $conn->query($sql);
         </main>
     </div>
 
-    <!-- Modal & JS -->
+    <!-- Modal Details & Delete -->
     <div id="detailModal" class="custom-modal">
         <div class="custom-modal-content detail-modal-content">
             <div class="detail-modal-header">
@@ -295,6 +283,7 @@ $result = $conn->query($sql);
             <div id="detailModalBody" class="detail-grid"></div>
         </div>
     </div>
+
     <div id="confirmDeleteModal" class="custom-modal">
         <div class="custom-modal-content confirm-modal-content">
             <div class="confirm-icon"><i class="fas fa-exclamation-triangle"></i></div>
@@ -306,28 +295,37 @@ $result = $conn->query($sql);
             </div>
         </div>
     </div>
-
+    
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const table = document.getElementById('ordersTable');
+        // --- Sidebar Logic ---
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if(mobileMenuToggle && sidebar && sidebarOverlay) {
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+            });
+
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
+        }
+        // ---------------------
+
+        const table = document.getElementById('pesananTable');
         const detailModal = document.getElementById('detailModal');
         const confirmDeleteModal = document.getElementById('confirmDeleteModal');
         const closeButtons = document.querySelectorAll('.close-modal');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-        let activeDropdown = null;
         let orderIdToDelete = null;
-        let rowToDelete = null; 
+        let activeDropdown = null;
 
-        const searchInput = document.getElementById('searchInput');
-        
-        // === Ambil Filter yang sedang Aktif ===
-        const filterSelect = document.querySelector('select[name="status_filter"]');
-        const currentFilter = filterSelect ? filterSelect.value : 'all';
-
-        // === (REMOVED) CLIENT-SIDE SEARCH JS ===
-        // Logika pencarian JS dihapus karena diganti server-side
-
+        // --- UPDATE STATUS LOGIC ---
         function updateOrderStatus(orderId, newStatus, statusElement) {
             const originalStatus = statusElement.textContent;
             statusElement.style.opacity = '0.5';
@@ -340,48 +338,25 @@ $result = $conn->query($sql);
             .then(response => response.json())
             .then(data => {
                 statusElement.style.opacity = '1';
-                
                 if (data.success) {
-                    let shouldRemove = false;
-
                     if (newStatus === 'Selesai') {
-                        shouldRemove = true;
-                    }
-                    else if (currentFilter !== 'all' && currentFilter !== newStatus) {
-                        shouldRemove = true;
-                    }
-
-                    if (shouldRemove) {
-                        const row = statusElement.closest('tr');
-                        if(row) {
-                            row.style.transition = 'opacity 0.5s';
-                            row.style.opacity = '0';
-                            setTimeout(() => {
-                                row.remove();
-                                const tbody = document.querySelector('#ordersTable tbody');
-                                if (tbody && tbody.rows.length === 0) {
-                                    window.location.reload(); // Reload agar pagination/pesan kosong benar
-                                }
-                            }, 500);
-                        }
+                         window.location.reload(); 
                     } else {
                         statusElement.textContent = newStatus;
                         statusElement.classList.remove('tertunda', 'proses', 'selesai', 'completed');
                         statusElement.classList.add(newStatus.toLowerCase());
                         statusElement.setAttribute('data-current-status', newStatus);
                     }
-                    
                     if (activeDropdown) {
                         activeDropdown.style.display = 'none';
                         activeDropdown = null;
                     }
-                }
-                else { 
-                    alert('Gagal: ' + data.message); 
-                    statusElement.textContent = originalStatus; 
+                } else {
+                    alert('Gagal: ' + data.message);
+                    statusElement.textContent = originalStatus;
                 }
             })
-            .catch(err => {
+            .catch(() => {
                 statusElement.style.opacity = '1';
                 statusElement.textContent = originalStatus;
                 alert('Terjadi kesalahan jaringan.');
@@ -394,16 +369,10 @@ $result = $conn->query($sql);
             fetch('delete-order.php', { method: 'POST', body: formData })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    confirmDeleteModal.style.display = 'none';
-                    if (rowToDelete) {
-                        rowToDelete.style.transition = 'opacity 0.5s';
-                        rowToDelete.style.opacity = '0';
-                        setTimeout(() => rowToDelete.remove(), 500);
-                    }
-                }
+                if (data.success) window.location.reload();
                 else alert('Gagal menghapus: ' + data.message);
-            });
+            })
+            .catch(() => alert('Terjadi kesalahan jaringan saat menghapus.'));
         }
 
         if(table) {
@@ -412,12 +381,13 @@ $result = $conn->query($sql);
                 const dropdownItem = e.target.closest('.status-dropdown li');
                 const detailButton = e.target.closest('.action-btn.detail');
                 const deleteButton = e.target.closest('.action-btn.delete');
-
+                
+                // 1. Handling Dropdown Status
                 if (statusTrigger) {
                     const dropdown = statusTrigger.nextElementSibling;
                     const currentStatus = statusTrigger.getAttribute('data-current-status');
                     let options = '';
-
+                    
                     if (currentStatus === 'Tertunda') {
                         options = `<li data-new-status="Proses">Proses</li>`;
                     } else if (currentStatus === 'Proses') {
@@ -429,46 +399,63 @@ $result = $conn->query($sql);
                     if (activeDropdown && activeDropdown !== dropdown) activeDropdown.style.display = 'none';
                     dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
                     activeDropdown = (dropdown.style.display === 'block') ? dropdown : null;
-                } 
+                }
+                
+                // 2. Handling Klik Item Dropdown
                 else if (dropdownItem) {
                     const newStatus = dropdownItem.dataset.newStatus;
                     const statusElement = dropdownItem.closest('.status-wrapper').querySelector('.status.interactive');
                     const orderId = dropdownItem.closest('tr').dataset.id;
                     updateOrderStatus(orderId, newStatus, statusElement);
-                } 
+                }
+
+                // 3. Detail
                 else if (detailButton) {
                     const orderId = detailButton.closest('tr').getAttribute('data-id');
-                    fetch(`get-order-details.php?id=${orderId}`).then(r => r.json()).then(data => {
-                        if(data.success) {
-                            const order = data.order;
-                            document.getElementById('detailModalTitle').textContent = `Detail Pesanan #${order.id_formatted}`;
-                            document.getElementById('detailModalBody').innerHTML = `
-                                <div class="detail-item"><strong>Nama Pemesan</strong><span>${order.nama_pemesan}</span></div>
-                                <div class="detail-item"><strong>Telepon</strong><span>${order.telepon}</span></div>
-                                <div class="detail-item"><strong>Produk</strong><span>${order.produk}</span></div>
-                                <div class="detail-item"><strong>Tanggal Masuk</strong><span>${order.tanggal_masuk}</span></div>
-                                <div class="detail-item"><strong>Ukuran</strong><span>${order.ukuran || '-'} cm</span></div>
-                                <div class="detail-item"><strong>Bahan</strong><span>${order.bahan || '-'}</span></div>
-                                <div class="detail-item"><strong>Jumlah</strong><span>${order.jumlah} pcs</span></div>
-                                <div class="detail-item"><strong>Status</strong><span class="status ${order.status.toLowerCase()}">${order.status}</span></div>
-                                <div class="detail-item full-width"><strong>Catatan</strong><textarea readonly>${order.catatan || 'Tidak ada catatan.'}</textarea></div>`;
-                            detailModal.style.display = 'block';
-                        }
-                    });
-                } 
+                    if(orderId) {
+                        fetch(`get-order-details.php?id=${orderId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if(data.success) {
+                                const order = data.order;
+                                document.getElementById('detailModalTitle').textContent = `Detail Pesanan #${order.id_formatted}`;
+                                document.getElementById('detailModalBody').innerHTML = `
+                                    <div class="detail-item"><strong>Nama Pemesan</strong><span>${order.nama_pemesan}</span></div>
+                                    <div class="detail-item"><strong>Telepon</strong><span>${order.telepon}</span></div>
+                                    <div class="detail-item"><strong>Produk</strong><span>${order.produk}</span></div>
+                                    <div class="detail-item"><strong>Tanggal Masuk</strong><span>${order.tanggal_masuk}</span></div>
+                                    <div class="detail-item"><strong>Ukuran</strong><span>${order.ukuran || '-'} cm</span></div>
+                                    <div class="detail-item"><strong>Bahan</strong><span>${order.bahan || '-'}</span></div>
+                                    <div class="detail-item"><strong>Jumlah</strong><span>${order.jumlah} pcs</span></div>
+                                    <div class="detail-item"><strong>Status</strong><span><span class="status completed">${order.status}</span></span></div>
+                                    <div class="detail-item full-width"><strong>Catatan</strong><textarea readonly>${order.catatan || 'Tidak ada catatan.'}</textarea></div>
+                                `;
+                                detailModal.style.display = 'block';
+                            }
+                        });
+                    }
+                }
+
+                // 4. Delete
                 else if (deleteButton) {
-                    rowToDelete = deleteButton.closest('tr');
-                    orderIdToDelete = rowToDelete.getAttribute('data-id');
+                    orderIdToDelete = deleteButton.closest('tr').getAttribute('data-id');
                     confirmDeleteModal.style.display = 'block';
                 }
             });
         }
 
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.status-wrapper') && activeDropdown) {
+                activeDropdown.style.display = 'none';
+                activeDropdown = null;
+            }
+        });
+
         closeButtons.forEach(btn => btn.onclick = () => btn.closest('.custom-modal').style.display = 'none');
-        if(cancelDeleteBtn) cancelDeleteBtn.onclick = () => confirmDeleteModal.style.display = 'none';
-        if(confirmDeleteBtn) confirmDeleteBtn.onclick = () => { if(orderIdToDelete) executeDelete(orderIdToDelete); };
-        window.onclick = (e) => { if(e.target.classList.contains('custom-modal')) e.target.style.display = 'none'; };
-        document.addEventListener('click', (e) => { if(!e.target.closest('.status-wrapper') && activeDropdown) { activeDropdown.style.display = 'none'; activeDropdown = null; }});
+        cancelDeleteBtn.onclick = () => { confirmDeleteModal.style.display = 'none'; orderIdToDelete = null; };
+        confirmDeleteBtn.onclick = () => { if (orderIdToDelete) executeDelete(orderIdToDelete); };
+        window.onclick = (event) => { if (event.target.classList.contains('custom-modal')) event.target.style.display = 'none'; };
     });
     </script>
 </body>

@@ -120,6 +120,7 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Katalog - Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -136,12 +137,14 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             align-items: center;
             gap: 16px;
             justify-content: space-between;
+            flex-wrap: wrap; /* Allow wrapping on mobile */
         }
         .filter-left {
             display: flex;
             align-items: center;
             gap: 14px;
             flex: 1;
+            min-width: 250px;
         }
         .filter-left label {
             font-weight: 600;
@@ -173,6 +176,7 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             box-shadow: 0 6px 16px rgba(59,130,246,0.3);
             transition: transform 0.2s, box-shadow 0.2s;
             text-decoration: none;
+            white-space: nowrap;
         }
         .btn-add-design:hover {
             transform: translateY(-1px);
@@ -270,7 +274,10 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 </head>
 <body>
     <div class="dashboard-container">
-        <aside class="sidebar">
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header"><i class="fas fa-crown"></i><h2>King Printing</h2></div>
             <nav class="sidebar-nav">
                 <ul>
@@ -298,7 +305,10 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
         <main class="main-content">
             <header class="main-header">
-                <div class="header-left"><h3>Kelola Katalog</h3></div>
+                <div class="header-left" style="display:flex; align-items:center;">
+                    <i class="fas fa-bars mobile-header-toggle" id="mobileMenuToggle"></i>
+                    <h3>Kelola Katalog</h3>
+                </div>
             </header>
 
             <?php if ($pesan): ?>
@@ -406,6 +416,23 @@ $desains = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             if (event.target.classList.contains('admin-modal')) {
                 event.target.style.display = "none";
             }
+        }
+        
+        // --- Sidebar Logic ---
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if(mobileMenuToggle && sidebar && sidebarOverlay) {
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+            });
+
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
         }
     </script>
 </body>

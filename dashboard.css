@@ -27,11 +27,12 @@ body {
 .dashboard-container {
     display: flex;
     height: 100vh;
+    /* overflow: hidden; HAPUS ini agar layout asli desktop tidak terganggu */
 }
 
-/* --- Sidebar --- */
+/* --- Sidebar (KEMBALI KE ASLI UNTUK DESKTOP) --- */
 .sidebar {
-    margin-top: -50px;
+    margin-top: -50px; /* Mengembalikan nilai asli */
     width: 260px;
     background-color: var(--bg-sidebar);
     box-shadow: 5px 0px 25px var(--shadow-color);
@@ -39,7 +40,7 @@ body {
     flex-direction: column;
     padding: 2rem 1.5rem;
     box-sizing: border-box;
-    transition: width 0.3s ease;
+    transition: width 0.3s ease; /* Mengembalikan transisi asli */
     z-index: 10;
 }
 
@@ -60,6 +61,7 @@ body {
 
 .sidebar-nav {
     flex-grow: 1;
+    /* overflow-y: auto; HAPUS ini dari desktop, penyebab scrollbar */
 }
 
 .sidebar-nav ul {
@@ -256,11 +258,12 @@ body {
     font-size: 0.9rem;
 }
 
-/* === TABEL UTAMA (Fixed Layout) === */
+/* === TABEL UTAMA (Fixed Layout Desktop) === */
 table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed; /* Mengunci lebar kolom */
+    margin-top: 10px;
 }
 
 /* Lebar Kolom Proporsional */
@@ -281,7 +284,7 @@ th, td {
     vertical-align: middle;
 }
 
-/* FIX: pastikan garis pemisah baris tabel utuh di seluruh lebar */
+/* Fix garis tabel utuh */
 table tbody tr {
     border-bottom: 1px solid var(--border-color);
 }
@@ -417,7 +420,7 @@ td:first-child {
     font-size: 1rem;
 }
 
-/* === MODAL STYLES (DIPERBAIKI DI SINI) === */
+/* === MODAL STYLES === */
 .custom-modal {
     display: none;
     position: fixed;
@@ -452,11 +455,9 @@ td:first-child {
     to { opacity: 1; transform: translate(-50%, -50%); }
 }
 
-/* Variant Modal */
 .detail-modal-content { max-width: 600px; }
 .confirm-modal-content { max-width: 420px; text-align: center; }
 
-/* Modal Header */
 .detail-modal-header {
     padding-bottom: 15px;
     border-bottom: 1px solid #e0e0e0;
@@ -479,7 +480,6 @@ td:first-child {
     cursor: pointer;
 }
 
-/* Detail Grid System (DIPERBAIKI UNTUK TEXT WRAPPING) */
 .detail-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -487,7 +487,7 @@ td:first-child {
 }
 
 .detail-item {
-    min-width: 0; /* FIX 1: Mencegah item grid melebar melampaui kolomnya */
+    min-width: 0;
 }
 
 .detail-item strong {
@@ -501,10 +501,10 @@ td:first-child {
 .detail-item span {
     color: #333;
     font-weight: 500;
-    display: block; /* FIX 2: Block element agar wrapping bekerja */
-    word-wrap: break-word;     /* Support browser lama */
-    overflow-wrap: break-word; /* Standar modern */
-    word-break: break-word;    /* FIX 3: Paksa potong kata panjang (sdddd...) */
+    display: block;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
     line-height: 1.5;
 }
 
@@ -534,7 +534,6 @@ td:first-child {
     gap: 1rem;
 }
 
-/* Admin Modal (Produk) */
 .admin-modal {
     display: none;
     position: fixed;
@@ -572,18 +571,14 @@ td:first-child {
 
 .admin-modal-close:hover { color: black; }
 
-/* HANYA Tambahkan Style Badge ini di dashboard.css */
 .notification-badge {
-    background-color: #FFD700; /* Warna Kuning */
+    background-color: #FFD700;
     color: #9a2020;
     font-size: 0.75rem;
     font-weight: bold;
     padding: 2px 8px;
     border-radius: 12px;
-    
-    /* INI KUNCINYA: */
-    margin-left: auto; /* Otomatis dorong badge ke kanan mentok */
-    
+    margin-left: auto;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     animation: pulse 2s infinite;
 }
@@ -594,29 +589,27 @@ td:first-child {
     100% { transform: scale(1); }
 }
 
-/* --- FIX TOMBOL AKSI (Mata & Sampah) --- */
 .action-cell {
     display: flex;
-    gap: 8px; /* Jarak antar tombol */
-    justify-content: flex-start; /* Atau center jika ingin di tengah */
+    gap: 8px;
+    justify-content: flex-start;
 }
 
 .action-btn {
-    width: 38px;           /* Lebar Tetap */
-    height: 38px;          /* Tinggi Tetap (Sama dengan lebar agar kotak) */
-    padding: 0;            /* Hapus padding agar ikon di tengah */
+    width: 38px;
+    height: 38px;
+    padding: 0;
     border: none;
-    border-radius: 6px;    /* Sudut membulat */
-    display: inline-flex;  /* Flexbox untuk tengahin ikon */
+    border-radius: 6px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;       /* Ukuran ikon */
+    font-size: 1rem;
     cursor: pointer;
     transition: all 0.2s ease;
     color: white;
 }
 
-/* Warna Tombol Detail (Mata) - Abu-abu */
 .action-btn.detail {
     background-color: #6c757d; 
 }
@@ -625,7 +618,6 @@ td:first-child {
     transform: translateY(-2px);
 }
 
-/* Warna Tombol Hapus (Sampah) - Merah */
 .action-btn.delete {
     background-color: #dc3545;
 }
@@ -634,34 +626,105 @@ td:first-child {
     transform: translateY(-2px);
 }
 
-/* --- PERBAIKAN TABEL AGAR RAPI --- */
-table {
-    width: 100%;
-    border-collapse: collapse; /* Pastikan garis menyatu */
-    margin-top: 10px;
-}
-
-th, td {
-    padding: 15px 12px; /* Memberi jarak napas (atas-bawah 15px, kiri-kanan 12px) */
-    text-align: left;
-    border-bottom: 1px solid var(--border-color); /* Garis pemisah halus */
-    vertical-align: middle; /* KUNCI: Menjaga teks & tombol sejajar vertikal (tengah) */
-    font-size: 0.95rem;
-    color: var(--text-primary);
-}
-
-/* Khusus Header Tabel */
-thead th {
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 0.5px;
-    border-bottom: 2px solid var(--border-color); /* Garis header sedikit lebih tebal */
-    padding-bottom: 15px; /* Jarak ekstra ke garis bawah header */
-}
-
-/* Efek Hover pada Baris */
 tbody tr:hover {
-    background-color: #fcfcfc; /* Highlight tipis saat kursor lewat */
+    background-color: #fcfcfc;
+}
+
+/* --- MOBILE & TABLET ONLY STYLES --- */
+.mobile-header-toggle {
+    display: none; /* Hide on desktop */
+}
+
+.sidebar-overlay {
+    display: none; /* Hide on desktop */
+}
+
+@media (max-width: 1024px) {
+    .mobile-header-toggle {
+        display: block;
+        font-size: 1.5rem;
+        color: var(--brand-dark-red);
+        cursor: pointer;
+        margin-right: 1rem;
+    }
+
+    .sidebar {
+        margin-top: 0; /* Reset margin for mobile specific */
+        position: fixed;
+        left: -260px;
+        top: 0;
+        height: 100vh;
+        z-index: 1001;
+        transition: left 0.3s ease;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+    
+    .sidebar-nav {
+        overflow-y: auto; /* Enable scroll on mobile nav only */
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 900;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    .main-content {
+        padding: 1.5rem;
+    }
+
+    .main-header {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .search-box input {
+        min-width: 100%;
+    }
+
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .customers-table {
+        padding: 1rem;
+    }
+
+    /* Tabel Responsive khusus Mobile */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+        min-width: 800px; /* Force scroll */
+    }
+
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .table-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
 }

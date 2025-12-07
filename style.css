@@ -1150,3 +1150,216 @@ section {
         font-size: 1.8rem;
     }
 }
+
+/* =========================
+   ENHANCED RESPONSIVE LAYER
+   ========================= */
+
+/* Mobile: ≤480px */
+@media (max-width: 480px) {
+    .container {
+        width: 92%;
+    }
+    .header .container {
+        padding: 0 1rem;
+    }
+    .logo-image {
+        height: 42px;
+        margin-right: 8px;
+    }
+    .logo-text span {
+        font-size: 1.6rem;
+    }
+    .nav {
+        padding: 0.4rem 0.6rem;
+    }
+    .nav ul li a {
+        font-size: 0.95rem;
+        padding: 0.35rem 0;
+        display: inline-block;
+    }
+    .hero {
+        padding: 7rem 0 3.5rem;
+    }
+    .hero .container {
+        gap: 1.5rem;
+    }
+    .hero-content {
+        padding: 0 0.2rem;
+    }
+    .hero-content h1 {
+        font-size: 1.7rem;
+        line-height: 1.25;
+    }
+    .hero-content p {
+        font-size: 1rem;
+        max-width: 100%;
+    }
+    .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    .hero-buttons a {
+        width: 100%;
+        justify-content: center;
+    }
+    .hero-image {
+        min-width: 0;
+    }
+    .myHeroSlider .swiper-slide img {
+        height: 230px;
+    }
+    .section-title {
+        font-size: 1.6rem;
+        margin-bottom: 2.3rem;
+    }
+    .produk-item {
+        padding: 2rem 1.5rem;
+    }
+    .produk-item h3 {
+        font-size: 1.2rem;
+    }
+    .btn-order,
+    .btn-view-design {
+        font-size: 0.95rem;
+    }
+    .step {
+        padding: 1.8rem 1.2rem;
+    }
+    .step h3 {
+        font-size: 1.15rem;
+    }
+    .step-icon,
+    .produk-icon,
+    .keunggulan-icon {
+        font-size: 2.4rem;
+    }
+    .faq-wrapper {
+        gap: 2rem;
+    }
+    .faq-list {
+        max-height: none;
+        padding-right: 0;
+    }
+    .faq-question h3 {
+        font-size: 1rem;
+    }
+    .faq-answer p {
+        font-size: 0.95rem;
+    }
+    .footer {
+        padding: 3rem 0 1rem;
+    }
+    .footer-content {
+        gap: 2rem;
+    }
+    .whatsapp-sticky {
+        width: 52px;
+        height: 52px;
+        font-size: 2.1rem;
+        right: 18px;
+        bottom: 18px;
+    }
+}
+
+/* Tablet: 481px–1024px */
+@media (min-width: 481px) and (max-width: 1024px) {
+    .container {
+        width: 92%;
+    }
+    .header .container {
+        padding: 0 1.2rem;
+    }
+    .logo-text span {
+        font-size: 1.9rem;
+    }
+    .nav ul li {
+        margin-left: 1.2rem;
+    }
+    .nav ul li a {
+        font-size: 1rem;
+    }
+    .hero {
+        padding: 7.5rem 0 4rem;
+    }
+    .hero .container {
+        gap: 2.2rem;
+        flex-direction: column-reverse;
+        text-align: center;
+    }
+    .hero-content {
+        padding: 0 0.6rem;
+    }
+    .hero-content h1 {
+        font-size: 2.4rem;
+    }
+    .hero-content p {
+        font-size: 1.05rem;
+        max-width: 100%;
+        margin: 0 auto 2rem;
+    }
+    .hero-buttons {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .hero-image {
+        width: 100%;
+        max-width: 680px;
+    }
+    .myHeroSlider .swiper-slide img {
+        height: 300px;
+    }
+    .produk-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .steps {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .faq-wrapper {
+        flex-direction: column;
+        gap: 2.5rem;
+    }
+    .faq-sidebar {
+        width: 100%;
+        max-width: 100%;
+    }
+    .faq-list {
+        max-height: none;
+        width: 100%;
+    }
+}
+
+/* Desktop refinement: ≥1025px */
+@media (min-width: 1025px) {
+    .container {
+        width: 88%;
+        max-width: 1240px;
+    }
+    .header .container {
+        padding: 0 0.5rem;
+    }
+    .nav ul li {
+        margin-left: 1.6rem;
+    }
+    .nav ul li a {
+        font-size: 1.02rem;
+    }
+    .hero {
+        padding: 8rem 0 5rem;
+    }
+    .hero-content {
+        max-width: 560px;
+    }
+    .hero-content h1 {
+        font-size: 3.3rem;
+    }
+    .hero-content p {
+        font-size: 1.18rem;
+    }
+    .hero-image .swiper-slide img {
+        height: 440px;
+    }
+    .produk-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+}

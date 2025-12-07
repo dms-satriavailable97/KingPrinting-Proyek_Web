@@ -60,7 +60,10 @@ $badge_count = $result_notif->fetch_assoc()['jumlah_baru'];
 </head>
 <body>
     <div class="dashboard-container">
-        <aside class="sidebar">
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header"><i class="fas fa-crown"></i><h2>King Printing</h2></div>
             <nav class="sidebar-nav">
                 <ul>
@@ -85,9 +88,12 @@ $badge_count = $result_notif->fetch_assoc()['jumlah_baru'];
             </nav>
             <div class="sidebar-footer"><a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
         </aside>
+        
         <main class="main-content">
             <header class="main-header">
-                <div class="header-left">
+                <div class="header-left" style="display:flex; align-items:center;">
+                    <!-- Mobile Hamburger Toggle -->
+                    <i class="fas fa-bars mobile-header-toggle" id="mobileMenuToggle"></i>
                     <h3>Hello, <span class="username"><?php echo ucfirst(htmlspecialchars($_SESSION['username'])); ?></span> 👋</h3>
                 </div>
                 <div class="header-right">
@@ -115,56 +121,60 @@ $badge_count = $result_notif->fetch_assoc()['jumlah_baru'];
 
             <section class="customers-table">
                 <div class="table-header"><h3>Ringkasan Pesanan Aktif</h3></div>
-                <table id="ordersTable">
-                    <thead>
-                        <tr>
-                            <th>ID Pesanan</th>
-                            <th>Nama Pemesan</th>
-                            <th>Produk</th>
-                            <th>Tanggal Masuk</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $sql = "SELECT id, nama_pemesan, produk, tanggal_masuk, status, telepon, ukuran, bahan, jumlah, catatan 
-                                FROM pesanan 
-                                WHERE status IN ('Tertunda', 'Proses') 
-                                ORDER BY tanggal_masuk DESC LIMIT 5";
-                        $result = $conn->query($sql);
+                
+                <!-- Added responsive wrapper for mobile table scroll -->
+                <div class="table-responsive">
+                    <table id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>ID Pesanan</th>
+                                <th>Nama Pemesan</th>
+                                <th>Produk</th>
+                                <th>Tanggal Masuk</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $sql = "SELECT id, nama_pemesan, produk, tanggal_masuk, status, telepon, ukuran, bahan, jumlah, catatan 
+                                    FROM pesanan 
+                                    WHERE status IN ('Tertunda', 'Proses') 
+                                    ORDER BY tanggal_masuk DESC LIMIT 5";
+                            $result = $conn->query($sql);
 
-                        if ($result->num_rows > 0) {
-                            while($row = $result->fetch_assoc()) {
-                                $status = htmlspecialchars($row['status']);
-                                $status_class = strtolower($status);
-                                
-                                $nama_aman = htmlspecialchars($row['nama_pemesan']);
-                                $produk_aman = htmlspecialchars($row['produk']);
+                            if ($result->num_rows > 0) {
+                                while($row = $result->fetch_assoc()) {
+                                    $status = htmlspecialchars($row['status']);
+                                    $status_class = strtolower($status);
+                                    
+                                    $nama_aman = htmlspecialchars($row['nama_pemesan']);
+                                    $produk_aman = htmlspecialchars($row['produk']);
 
-                                echo "<tr data-id='" . $row['id'] . "'>";
-                                echo "<td>#KP" . str_pad($row['id'], 3, '0', STR_PAD_LEFT) . "</td>";
-                                echo "<td title='$nama_aman'>" . $nama_aman . "</td>";
-                                echo "<td title='$produk_aman'>" . $produk_aman . "</td>";
-                                echo "<td>" . date('d M Y', strtotime($row['tanggal_masuk'])) . "</td>";
-                                echo "<td>
-                                        <div class='status-wrapper'>
-                                            <span class='status interactive " . $status_class . "' data-current-status='" . $status . "'>" . $status . "</span>
-                                            <ul class='status-dropdown'></ul>
-                                        </div>
-                                      </td>";
-                                echo "<td class='action-cell'>
-                                        <button class='action-btn detail' title='Lihat Detail'><i class='fas fa-eye'></i></button>
-                                        <button class='action-btn delete' title='Hapus Pesanan'><i class='fas fa-trash'></i></button>
-                                    </td>";
-                                echo "</tr>";
+                                    echo "<tr data-id='" . $row['id'] . "'>";
+                                    echo "<td>#KP" . str_pad($row['id'], 3, '0', STR_PAD_LEFT) . "</td>";
+                                    echo "<td title='$nama_aman'>" . $nama_aman . "</td>";
+                                    echo "<td title='$produk_aman'>" . $produk_aman . "</td>";
+                                    echo "<td>" . date('d M Y', strtotime($row['tanggal_masuk'])) . "</td>";
+                                    echo "<td>
+                                            <div class='status-wrapper'>
+                                                <span class='status interactive " . $status_class . "' data-current-status='" . $status . "'>" . $status . "</span>
+                                                <ul class='status-dropdown'></ul>
+                                            </div>
+                                          </td>";
+                                    echo "<td class='action-cell'>
+                                            <button class='action-btn detail' title='Lihat Detail'><i class='fas fa-eye'></i></button>
+                                            <button class='action-btn delete' title='Hapus Pesanan'><i class='fas fa-trash'></i></button>
+                                        </td>";
+                                    echo "</tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='6' style='text-align:center; padding: 2rem;'>Tidak ada pesanan aktif untuk diproses.</td></tr>";
                             }
-                        } else {
-                            echo "<tr><td colspan='6' style='text-align:center; padding: 2rem;'>Tidak ada pesanan aktif untuk diproses.</td></tr>";
-                        }
-                        ?>
-                    </tbody>
-                </table>
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
                  <div class="table-footer"><span>Menampilkan 5 pesanan aktif terbaru</span></div>
             </section>
         </main>
@@ -183,6 +193,24 @@ $badge_count = $result_notif->fetch_assoc()['jumlah_baru'];
 
     <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // --- Sidebar Logic ---
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if(mobileMenuToggle && sidebar && sidebarOverlay) {
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+            });
+
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
+        }
+        // ---------------------
+
         const table = document.getElementById('ordersTable');
         const detailModal = document.getElementById('detailModal');
         const closeDetailModal = document.querySelector('.close-detail-modal');
